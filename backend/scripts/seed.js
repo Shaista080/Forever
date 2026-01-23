@@ -1,82 +1,94 @@
-import axios from 'axios';
-import FormData from 'form-data';
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import { v2 as cloudinary } from 'cloudinary';
+import productModel from '../models/productModel.js';
 import fs from 'fs';
 import path from 'path';
-import 'dotenv/config';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const API_URL = 'http://localhost:4000';
-const IMAGES_PATH = path.join(__dirname, '..', '..', 'frontend', 'src', 'assets');
+const IMAGES_BASE_PATH = path.join(__dirname, '..', '..', 'frontend', 'src', 'assets');
 const SEED_DATA_PATH = path.join(__dirname, 'seed-data.json');
 
-const getAdminToken = async () => {
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+});
+
+// Connect to MongoDB
+const connectDB = async () => {
   try {
-    const response = await axios.post(`${API_URL}/api/user/admin`, {
-      email: process.env.ADMIN_EMAIL,
-      password: process.env.ADMIN_PASSWORD,
-    });
-    if (response.data.success) {
-      console.log('Admin login successful.');
-      return response.data.token;
-    } else {
-      throw new Error('Admin login failed: ' + response.data.message);
-    }
+    await mongoose.connect(`${process.env.MONGODB_URI}/e-commerce-forever`);
+    console.log("MongoDB Connected for seeding!");
   } catch (error) {
-    console.error('Error getting admin token:', error.message);
+    console.error("Error connecting to MongoDB for seeding:", error.message);
     process.exit(1);
   }
 };
 
 const seedDatabase = async () => {
-  const token = await getAdminToken();
+  await connectDB();
 
   try {
-    const products = JSON.parse(fs.readFileSync(SEED_DATA_PATH, 'utf-8'));
-    const form = new FormData();
+    console.log('Clearing existing products from the database...');
+    await productModel.deleteMany({});
+    console.log('Existing products cleared.');
 
-    // We need to strip the 'images' property from the product objects before stringifying
-    const productsForPayload = products.map(p => {
-        const { images, ...rest } = p;
-        return rest;
-    });
+    const productsData = JSON.parse(fs.readFileSync(SEED_DATA_PATH, 'utf-8'));
+    let productsToInsert = [];
 
-    form.append('products', JSON.stringify(productsForPayload));
-
-    products.forEach((product, productIndex) => {
+    console.log('Starting product image uploads to Cloudinary and preparing data...');
+    for (const product of productsData) {
+      const imagesUrl = [];
       if (product.images && product.images.length > 0) {
-        product.images.forEach((imageName, imageIndex) => {
-          const imagePath = path.join(IMAGES_PATH, imageName);
+        for (const imageName of product.images) {
+          const imagePath = path.join(IMAGES_BASE_PATH, imageName);
           if (fs.existsSync(imagePath)) {
-            form.append(`product_${productIndex}_image_${imageIndex}`, fs.createReadStream(imagePath));
+            try {
+              const result = await cloudinary.uploader.upload(imagePath, {
+                resource_type: "image",
+              });
+              imagesUrl.push(result.secure_url);
+            } catch (uploadError) {
+              console.warn(`Warning: Failed to upload image ${imageName} for product ${product.name}:`, uploadError.message);
+              // Optionally, push a placeholder or skip this image
+            }
           } else {
-            console.warn(`Warning: Image not found for product ${product.name}: ${imageName}`);
+            console.warn(`Warning: Local image file not found for product ${product.name}: ${imageName}`);
+            // Optionally, push a placeholder or skip this image
           }
-        });
+        }
       }
-    });
 
-    console.log('Sending bulk product request...');
-    const response = await axios.post(`${API_URL}/api/product/add-bulk`, form, {
-      headers: {
-        ...form.getHeaders(),
-        'Authorization': `Bearer ${token}`,
-      },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
+      productsToInsert.push({
+        ...product,
+        price: Number(product.price),
+        bestSeller: product.bestSeller === "true" || product.bestSeller === true,
+        sizes: Array.isArray(product.sizes) ? product.sizes : JSON.parse(product.sizes),
+        image: imagesUrl, // Use Cloudinary URLs
+        date: Date.now(),
+      });
+    }
 
-    if (response.data.success) {
+    if (productsToInsert.length > 0) {
+      console.log(`Inserting ${productsToInsert.length} products into the database...`);
+      await productModel.insertMany(productsToInsert);
       console.log('Database seeded successfully!');
     } else {
-      console.error('Failed to seed database:', response.data.message);
+      console.log('No products to insert.');
     }
+
   } catch (error) {
-    console.error('An error occurred during seeding:', error.response ? error.response.data : error.message);
+    console.error('An error occurred during seeding:', error.message);
     process.exit(1);
+  } finally {
+    mongoose.connection.close();
+    console.log("MongoDB connection closed.");
   }
 };
 

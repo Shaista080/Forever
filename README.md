@@ -112,33 +112,33 @@ npm run dev
 ![Orders](./frontend/public/a4.png)
 
 
-### Cloudinary Integration and Database Seeding
+### Cloudinary Integration
 
-The application is configured to upload all product images to Cloudinary, a cloud-based image management service.
+The application uses Cloudinary, a cloud-based image management service, for storing all product images. When an image is uploaded (e.g., via API endpoints or the seeding script), it is sent to Cloudinary, which returns a secure URL. This URL is then stored in the `image` field of the product document in the MongoDB database.
 
-*   **How it Works:** When a product is added via the API (either individually or in bulk), the backend server first uploads the image files to Cloudinary. Cloudinary then returns a unique, secure URL for each image. This URL is what gets stored in the `image` field of the product document in the MongoDB database.
+### Automatic Database Seeding for Products (Development Only)
 
-*   **Why the DB Seed Script Isn't for Production:** A seed script (`backend/scripts/products_seed.js`) was created to quickly populate the database with mock data. However, this script should **only be used for local development and testing**. It bypasses the API and therefore does not upload any images to Cloudinary. It inserts placeholder image paths directly into the database. If you use this script to populate a staging or production database, all your products will have broken images. **Always use the API to add products in a live environment.**
+To provide a consistent and populated development environment, the database seeding process is automated. The `seed.js` script (located in `backend/scripts/seed.js`) directly connects to MongoDB and utilizes the Cloudinary SDK to upload product images.
 
-### Automatic Database Seeding for Products
-
-Populating the database with initial data (seeding) is a common requirement. However, since this project requires uploading product images to Cloudinary, a simple database script is not sufficient as it would bypass the image upload process.
-
-*   **The Problem:** How to automatically seed the database with products when creating those products requires calling an API (to upload images) that is part of the very server we are trying to initialize.
-
-*   **The Solution:** The best practice is to use a standalone script that calls the running server's API. This ensures all application logic, including image uploads, is executed. A `seed.js` script has been created for this purpose. It reads product data from a local JSON file `seed-data.json`, and then programmatically calls the `/api/product/add-bulk` endpoint to seed the database correctly.
+*   **Purpose:** This script is designed exclusively for local development and testing. It clears existing product data and populates the database with mock data from `backend/scripts/seed-data.json`. It should **not** be used in production environments.
 
 *   **How to Run the Seed Script:**
 
-   **Pre-requisites:** The backend server must be running.
+    The seeding process is integrated into the backend development server startup.
 
-    3.  **Run the Seed Script:** In a **new terminal window**, navigate to the `/backend` directory and run:
+    1.  **Start the Backend Development Server:** In the `/backend` directory, run:
         ```bash
-        npm run db:seed
+        npm run dev
         ```
+    This command will automatically:
+    *   Connect to MongoDB.
+    *   Clear all existing product data.
+    *   Upload images from `frontend/src/assets` to Cloudinary.
+    *   Populate the database with products from `backend/scripts/seed-data.json`.
+    *   Then, start the `node` server.
 
-    This will populate your database with the products from `backend/scripts/seed-data.json` and upload all associated images to Cloudinary. Ensure your `.env` file is correctly configured with your Admin and Cloudinary credentials before running the script. 
-    NOTE: DB seeding could take up to 30 seconds. 
+    Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
+    NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images. 
 
 
 ## Other Resolved Issues
