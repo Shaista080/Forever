@@ -21,7 +21,7 @@ const Verify = () => {
       const res = await axios.post(
         backendUrl + "/api/order/verifystripe",
         { success, orderId },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
