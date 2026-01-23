@@ -5,7 +5,6 @@ Forever is a full-featured e-commerce platform built using the MERN stack and st
 ## Features
 
 - **Frontend:**
-
   - Responsive and clean UI for browsing products.
   - User authentication (Login, Register).
   - Product search, filter, and sorting options.
@@ -13,7 +12,6 @@ Forever is a full-featured e-commerce platform built using the MERN stack and st
   - Checkout process with order summary and payment integration.
 
 - **Admin Panel:**
-
   - Dashboard for managing products, orders, and users.
   - Add, edit, and delete products.
   - View customer orders and manage order status.
@@ -111,7 +109,6 @@ npm run dev
 ![Lists](./frontend/public/a3.png)
 ![Orders](./frontend/public/a4.png)
 
-
 ### Cloudinary Integration
 
 The application uses Cloudinary, a cloud-based image management service, for storing all product images. When an image is uploaded (e.g., via API endpoints or the seeding script), it is sent to Cloudinary, which returns a secure URL. This URL is then stored in the `image` field of the product document in the MongoDB database.
@@ -120,56 +117,21 @@ The application uses Cloudinary, a cloud-based image management service, for sto
 
 To provide a consistent and populated development environment, the database seeding process is automated. The `seed.js` script (located in `backend/scripts/seed.js`) directly connects to MongoDB and utilizes the Cloudinary SDK to upload product images.
 
-*   **Purpose:** This script is designed exclusively for local development and testing. It clears existing product data and populates the database with mock data from `backend/scripts/seed-data.json`. It should **not** be used in production environments.
+- **Purpose:** This script is designed exclusively for local development and testing. It clears existing product data and populates the database with mock data from `backend/scripts/seed-data.json`. It should **not** be used in production environments.
 
-*   **How to Run the Seed Script:**
+- **How to Run the Seed Script:**
 
-    The seeding process is integrated into the backend development server startup.
+  The seeding process is integrated into the backend development server startup.
+  1.  **Start the Backend Development Server:** In the `/backend` directory, run:
+      `bash
+    npm run dev
+    `
+      This command will automatically:
+  - Connect to MongoDB.
+  - Clear all existing product data.
+  - Upload images from `frontend/src/assets` to Cloudinary.
+  - Populate the database with products from `backend/scripts/seed-data.json`.
+  - Then, start the `node` server.
 
-    1.  **Start the Backend Development Server:** In the `/backend` directory, run:
-        ```bash
-        npm run dev
-        ```
-    This command will automatically:
-    *   Connect to MongoDB.
-    *   Clear all existing product data.
-    *   Upload images from `frontend/src/assets` to Cloudinary.
-    *   Populate the database with products from `backend/scripts/seed-data.json`.
-    *   Then, start the `node` server.
-
-    Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
-    NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images. 
-
-
-## Other Resolved Issues
-
-### 1. JWT Token Authentication
-
-*   **Problem:** The way admin login was set up was insecure and non-standard:
-	•	Instead of using a proper, secure JWT (JSON Web Token), the system created a fake token by just joining the admin’s email and password into a string.
-	•	This “token” was sent using a custom header called token (which is not how it’s usually done).
-	•	Because of this, whenever someone tried to access admin-only routes, they got “Not Authorized” errors — since the system wasn’t verifying the token properly.
-
-*   **Solution:** The authentication system was rewritten to use proper JWT best practices:
-	1.	✅ When an admin logs in, a real JWT is created.
-	•	This token includes some useful information, like "role": "admin".
-	2.	✅ The token is now sent in the standard Authorization header (like this: Authorization: Bearer <token>), which is how most APIs expect it.
-	3.	✅ The middleware that protects admin routes now:
-	•	Reads the JWT from the correct header,
-	•	Verifies the token is valid (not tampered with),
-	•	And checks if the user really has an admin role.
-
-   Why this is better:
-	•	More secure: Real JWTs can’t be easily forged.
-	•	More compatible: Works like most other APIs and clients expect.
-	•	More flexible: You can later add more user roles or data into the JWT.
-
-### 2. Bulk Product Upload
-
-*   **Problem:** The API lacked a feature to add multiple products in a single request. The existing `POST /api/product/add` endpoint only supported adding one product at a time, which is inefficient for populating the database or managing large inventories.
-
-*   **Solution:** A new endpoint, `POST /api/product/add-bulk`, was created to handle bulk product uploads.
-    *   This endpoint accepts a `multipart/form-data` request.
-    *   The product data is sent as a JSON string under a single field named `products`.
-    *   Image files are sent with field names that follow a specific convention (`product_0_image_0`, `product_1_image_0`, etc.) to map them to their corresponding product in the JSON array.
-    *   The backend controller (`addProductsBulk`) parses this data, uploads all images to Cloudinary, and then creates all the product documents in the database in a single, efficient `insertMany` operation.
+  Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
+  NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images.
