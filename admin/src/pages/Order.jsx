@@ -17,7 +17,7 @@ const Order = ({ token }) => {
       const res = await axios.post(
         backendUrl + "/api/order/list",
         {},
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {
@@ -36,7 +36,7 @@ const Order = ({ token }) => {
       const res = await axios.post(
         backendUrl + "/api/order/status",
         { orderId, status: e.target.value },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data.success) {

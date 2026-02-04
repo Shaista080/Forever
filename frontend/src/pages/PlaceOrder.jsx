@@ -72,7 +72,7 @@ const PlaceOrder = () => {
           const res = await axios.post(
             backendUrl + "/api/order/place",
             orderData,
-            { headers: { token } }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
           if (res.data.success) {
             setCartItems({});
@@ -86,7 +86,7 @@ const PlaceOrder = () => {
           const responseStripe = await axios.post(
             backendUrl + "/api/order/stripe",
             orderData,
-            { headers: { token } }
+            { headers: { Authorization: `Bearer ${token}` } }
           );
 
           if (responseStripe.data.success) {

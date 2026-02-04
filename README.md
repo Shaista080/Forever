@@ -5,7 +5,6 @@ Forever is a full-featured e-commerce platform built using the MERN stack and st
 ## Features
 
 - **Frontend:**
-
   - Responsive and clean UI for browsing products.
   - User authentication (Login, Register).
   - Product search, filter, and sorting options.
@@ -13,7 +12,6 @@ Forever is a full-featured e-commerce platform built using the MERN stack and st
   - Checkout process with order summary and payment integration.
 
 - **Admin Panel:**
-
   - Dashboard for managing products, orders, and users.
   - Add, edit, and delete products.
   - View customer orders and manage order status.
@@ -74,14 +72,21 @@ Forever is a full-featured e-commerce platform built using the MERN stack and st
 
 ````
 
+
+### Running MongoDB with Docker
+
+For a consistent and isolated development environment, you can run MongoDB in a Docker container.
+
+Use the following command to start a MongoDB container:
+
+```bash
+docker run --name mongoDB -d -p 27017:27017 mongo
+```
+
 5. Run both frontend and backend:
 ```bash
 npm run dev
 ````
-
-## Contributing
-
-Feel free to open issues or submit pull requests to contribute to this project!
 
 ## Screenshots
 
@@ -103,3 +108,30 @@ Feel free to open issues or submit pull requests to contribute to this project!
 ![Add Product](./frontend/public/a2.png)
 ![Lists](./frontend/public/a3.png)
 ![Orders](./frontend/public/a4.png)
+
+### Cloudinary Integration
+
+The application uses Cloudinary, a cloud-based image management service, for storing all product images. When an image is uploaded (e.g., via API endpoints or the seeding script), it is sent to Cloudinary, which returns a secure URL. This URL is then stored in the `image` field of the product document in the MongoDB database.
+
+### Automatic Database Seeding for Products (Development Only)
+
+To provide a consistent and populated development environment, the database seeding process is automated. The `seed.js` script (located in `backend/scripts/seed.js`) directly connects to MongoDB and utilizes the Cloudinary SDK to upload product images.
+
+- **Purpose:** This script is designed exclusively for local development and testing. It clears existing product data and populates the database with mock data from `backend/scripts/seed-data.json`. It should **not** be used in production environments.
+
+- **How to Run the Seed Script:**
+
+  The seeding process is integrated into the backend development server startup.
+  1.  **Start the Backend Development Server:** In the `/backend` directory, run:
+      `bash
+    npm run dev
+    `
+      This command will automatically:
+  - Connect to MongoDB.
+  - Clear all existing product data.
+  - Upload images from `frontend/src/assets` to Cloudinary.
+  - Populate the database with products from `backend/scripts/seed-data.json`.
+  - Then, start the `node` server.
+
+  Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
+  NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images.

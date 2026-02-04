@@ -91,3 +91,52 @@ export const singleProduct = async (req, res) => {
     res.json({ success: false, message: e.message });
   }
 };
+
+// function for bulk add products
+export const addProductsBulk = async (req, res) => {
+  try {
+    const productsData = JSON.parse(req.body.products);
+    const files = req.files;
+
+    if (!Array.isArray(productsData) || productsData.length === 0) {
+      return res.status(400).json({ success: false, message: "Invalid products data" });
+    }
+
+    let productsToSave = [];
+
+    for (let i = 0; i < productsData.length; i++) {
+      const product = productsData[i];
+      
+      // Find images for the current product
+      const productImages = files.filter(file => file.fieldname.startsWith(`product_${i}_`));
+
+      const imagesUrl = await Promise.all(
+        productImages.map(async (item) => {
+          let result = await cloudinary.uploader.upload(item.path, {
+            resource_type: "image",
+          });
+          return result.secure_url;
+        })
+      );
+
+      const productToSave = {
+        ...product,
+        price: Number(product.price),
+        bestSeller: product.bestSeller === "true" || product.bestSeller === true,
+        sizes: Array.isArray(product.sizes) ? product.sizes : JSON.parse(product.sizes),
+        image: imagesUrl,
+        date: Date.now(),
+      };
+      
+      productsToSave.push(productToSave);
+    }
+
+    await productModel.insertMany(productsToSave);
+
+    res.json({ success: true, message: "Products Added Successfully" });
+
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ success: false, message: e.message });
+  }
+};
