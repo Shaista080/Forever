@@ -1,0 +1,88 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env
+    environment: # Explicitly set MONGODB_URI for Docker Compose environment
+      MONGODB_URI: mongodb://mongodb:27017
+    volumes:
+      - ./backend:/app # Mount host code for live reloading
+      - /app/node_modules # Exclude node_modules from host mount
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      args: # Pass build arguments here
+        VITE_BACKEND_URL: http://localhost:4000
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app # Mount host code for hot reloading
+      - /app/node_modules # Exclude node_modules from host mount
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile.dev
+      args: # Pass build arguments here
+        VITE_BACKEND_URL: http://localhost:4000
+    container_name: admin
+    ports:
+      - "5174:5174" # Admin's internal dev server port
+    volumes:
+      - ./admin:/app # Mount host code for hot reloading
+      - /app/node_modules # Exclude node_modules from host mount
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: seed
+    env_file:
+      - ./backend/.env
+    environment: # Explicitly set MONGODB_URI for Docker Compose environment
+      MONGODB_URI: mongodb://mongodb:27017
+    volumes: # Mount frontend assets to match seed.js path calculation
+      - ./frontend/src/assets:/frontend/src/assets
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+    command: npm run db:seed # Run the seeding script
+    profiles: ["seed"] # Only run this service when explicitly requested
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
+    driver: bridge

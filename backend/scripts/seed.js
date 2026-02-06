@@ -59,6 +59,8 @@ const seedDatabase = async () => {
               // Optionally, push a placeholder or skip this image
             }
           } else {
+            console.log(`DEBUG: IMAGES_BASE_PATH is ${IMAGES_BASE_PATH}`);
+            console.log(`DEBUG: Calculated imagePath is ${imagePath}`);
             console.warn(`Warning: Local image file not found for product ${product.name}: ${imageName}`);
             // Optionally, push a placeholder or skip this image
           }
