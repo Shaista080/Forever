@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "server": "nodemon server.js",
-    "dev": "npm run db:seed && node server.js",
+    "dev": "nodemon server.js",
     "db:seed": "node scripts/seed.js"
   },
   "author": "",
