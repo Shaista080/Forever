@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Forever is a full-featured e-commerce platform built using the MERN stack and styled with Tailwind CSS. It includes a customer-facing frontend, an admin panel for managing the store, and a backend to handle data and API requests.",
   "main": "cypress.config.js",
+  "type": "module",
   "scripts": {
-    "e2e-tests-eslint": "eslint cypress -c cypress/eslint.config.mjs",
-    "e2e-tests-eslint-fix": "eslint cypress -c cypress/eslint.config.mjs --fix",
+    "e2e:tests:eslint": "eslint cypress -c cypress/eslint.config.mjs",
+    "e2e:tests:eslint:fix": "eslint cypress -c cypress/eslint.config.mjs --fix",
     "prettier:cy:check": "prettier --check cypress/",
     "prettier:cy:write": "prettier --write cypress/"
   },
