@@ -1,0 +1,89 @@
+name: Lint Code (ESLint + Prettier)
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    # Job to run linting and formatting checks for all projects using a matrix
+    lint-and-format:
+        name: Lint & Format (${{ matrix.project }})
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false # Don't cancel other matrix jobs if one fails
+            matrix:
+                project: [frontend, admin, backend, cypress]
+                include:
+                    - project: frontend
+                      working_directory: frontend
+                      lint_command: npm run lint
+                      prettier_command: npm run prettier
+                      cache_dependency_path: frontend/package-lock.json
+                    - project: admin
+                      working_directory: admin
+                      lint_command: npm run lint
+                      prettier_command: npm run prettier
+                      cache_dependency_path: admin/package-lock.json
+                    - project: backend
+                      working_directory: backend
+                      lint_command: npm run lint
+                      prettier_command: npm run prettier
+                      cache_dependency_path: backend/package-lock.json
+                    - project: cypress
+                      working_directory: . # Cypress scripts are run from root package.json
+                      lint_command: npm run e2e:tests:eslint
+                      prettier_command: npm run prettier:cy:check
+                      cache_dependency_path: package-lock.json # Root package-lock.json for Cypress scripts
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+                  cache-dependency-path: ${{ matrix.cache_dependency_path }}
+
+            - name: Install Root Dependencies (for Cypress scripts)
+              if: matrix.project == 'cypress'
+              run: npm ci
+              working-directory: .
+
+            - name: Install Project Dependencies
+              if: matrix.project != 'cypress'
+              run: npm ci
+              working-directory: ${{ matrix.working_directory }}
+
+            - name: Run Lint Check
+              run: ${{ matrix.lint_command }}
+              working-directory: ${{ matrix.working_directory }}
+              continue-on-error: true # Allow other checks to run even if this fails
+
+            - name: Run Prettier Check
+              run: ${{ matrix.prettier_command }}
+              working-directory: ${{ matrix.working_directory }}
+              continue-on-error: true # Allow other checks to run even if this fails
+
+    # Final job to ensure all quality checks passed
+    final-quality-check:
+        name: Final Lint Check
+        runs-on: ubuntu-latest
+        needs: [lint-and-format] # depends on lint-and-format
+        if: always()
+        # Always run this job, even if previous ones had continue-on-error: true
+        steps:
+            - name: Check if any lint job failed
+              run: |
+                  if [ "${{ needs.lint-and-format.result }}" == "failure" ]; then
+                    echo "One or more linting or formatting jobs failed. Please fix the issues."
+                    exit 1
+                  else
+                    echo "All linting and formatting checks passed."
+                  fi
