@@ -3,11 +3,18 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
+import prettierConfig from 'eslint-config-prettier' // Add this import
+
 export default [
   ...rootConfig,
   { ignores: ['dist'] },
   {
     files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
     settings: { react: { version: '18.3' } },
     plugins: {
       react,
@@ -26,4 +33,5 @@ export default [
       ],
     },
   },
+  prettierConfig, // Add prettierConfig here
 ]

@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from 'mongoose'
 
 const orderSchema = new mongoose.Schema({
   userId: {
@@ -20,7 +20,7 @@ const orderSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    default: "Order Placed",
+    default: 'Order Placed',
   },
   paymentMethod: {
     type: String,
@@ -35,8 +35,7 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-});
+})
 
-const orderModel =
-  mongoose.models.order || mongoose.model("order", orderSchema);
-export default orderModel;
+const orderModel = mongoose.models.order || mongoose.model('order', orderSchema)
+export default orderModel
