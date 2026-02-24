@@ -1,0 +1,74 @@
+name: Lint Code (ESLint + Prettier)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job to run linting and formatting checks for all projects using a matrix
+  lint-and-format:
+    name: Lint & Format (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Don't cancel other matrix jobs if one fails
+      matrix:
+        project: [frontend, admin, backend, cypress]
+        include:
+          - project: frontend
+            working_directory: frontend
+            lint_command: npm run lint
+            prettier_command: npm run prettier
+            cache_dependency_path: |
+              package-lock.json 
+              frontend/package-lock.json
+          - project: admin
+            working_directory: admin
+            lint_command: npm run lint
+            prettier_command: npm run prettier
+            cache_dependency_path: |
+              package-lock.json 
+              admin/package-lock.json
+          - project: backend
+            working_directory: backend
+            lint_command: npm run lint
+            prettier_command: npm run prettier
+            cache_dependency_path: |
+              package-lock.json 
+              backend/package-lock.json
+          - project: cypress
+            working_directory: . # Cypress scripts are run from root package.json
+            lint_command: npm run e2e:tests:eslint
+            prettier_command: npm run prettier:cy:check
+            cache_dependency_path: package-lock.json # Root package-lock.json for Cypress scripts
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.cache_dependency_path }}
+
+      - name: Install Root Dependencies
+        run: npm ci
+        working-directory: .
+
+      - name: Install Project Dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working_directory }}
+
+      - name: Run Lint Check
+        run: ${{ matrix.lint_command }}
+        working-directory: ${{ matrix.working_directory }}
+
+      - name: Run Prettier Check
+        run: ${{ matrix.prettier_command }}
+        working-directory: ${{ matrix.working_directory }}

@@ -2,6 +2,7 @@ import globals from 'globals'
 import pluginJs from '@eslint/js'
 
 export default [
+  { ignores: ['node_modules'] }, // Added global ignore for node_modules
   {
     languageOptions: {
       globals: {
@@ -10,14 +11,7 @@ export default [
       },
       ecmaVersion: 2022,
       sourceType: 'module',
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
     },
   },
   pluginJs.configs.recommended,
-  {
-    files: ['**/*.{js,jsx}'],
-    rules: {},
-  },
 ]
