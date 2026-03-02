@@ -36,14 +36,17 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body
 
+    // Convert email to lowercase
+    const lowerCaseEmail = email.toLowerCase()
+
     // checking user already exist or not
-    const exists = await userModel.findOne({ email })
+    const exists = await userModel.findOne({ email: lowerCaseEmail })
     if (exists) {
       return res.json({ success: false, message: 'User already exists' })
     }
 
     //validating email formate and strong password
-    if (!validator.isEmail(email)) {
+    if (!validator.isEmail(lowerCaseEmail)) {
       return res.json({
         success: false,
         message: 'Please enter a valid email',
@@ -61,7 +64,11 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    const newUser = new userModel({ name, email, password: hashedPassword })
+    const newUser = new userModel({
+      name,
+      email: lowerCaseEmail,
+      password: hashedPassword,
+    })
 
     const user = await newUser.save()
 
