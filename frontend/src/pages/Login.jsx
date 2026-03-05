@@ -10,11 +10,25 @@ const Login = () => {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
     try {
       if (currentState === 'Sign Up') {
+        if (password !== confirmPassword) {
+          toast.error("Passwords don't match")
+          return
+        }
+        if (password.length < 8) {
+          toast.error('Password must be at least 8 characters long')
+          return
+        }
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/
+        if (!specialCharRegex.test(password)) {
+          toast.error('Password must contain at least one special character')
+          return
+        }
         const res = await axios.post(backendUrl + '/api/user/register', {
           name,
           email,
@@ -50,7 +64,7 @@ const Login = () => {
     if (token) {
       navigate('/')
     }
-  }, [token])
+  }, [token, navigate])
 
   return (
     <form
@@ -90,9 +104,23 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         value={password}
       />
+      {currentState === 'Sign Up' && (
+        <input
+          type='password'
+          className='w-full px-3 py-2 border border-gray-800'
+          placeholder='Confirm Password'
+          required
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          value={confirmPassword}
+        />
+      )}
 
       <div className='w-full flex justify-between text-sm mt-[-8px]'>
-        <p className='cursor-pointer'>Forgot your password?</p>
+        {currentState === 'Login' ? (
+          <p className='cursor-pointer'>Forgot your password?</p>
+        ) : (
+          <span></span>
+        )}
         {currentState === 'Login' ? (
           <p
             onClick={() => setCurrentState('Sign Up')}
