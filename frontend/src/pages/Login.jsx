@@ -1,70 +1,25 @@
-import { useContext, useEffect, useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
-import axios from 'axios'
-import { toast } from 'react-toastify'
+import useAuthForm from '../hooks/useAuthForm'
 
 const Login = () => {
-  const { token, setToken, navigate, backendUrl } = useContext(ShopContext)
-  const [currentState, setCurrentState] = useState('Login')
+  const {
+    currentState,
+    setCurrentState,
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    onSubmitHandler,
+  } = useAuthForm()
 
-  const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
-  const [email, setEmail] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-
-  const onSubmitHandler = async (e) => {
-    e.preventDefault()
-    try {
-      if (currentState === 'Sign Up') {
-        if (password !== confirmPassword) {
-          toast.error("Passwords don't match")
-          return
-        }
-        if (password.length < 8) {
-          toast.error('Password must be at least 8 characters long')
-          return
-        }
-        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/
-        if (!specialCharRegex.test(password)) {
-          toast.error('Password must contain at least one special character')
-          return
-        }
-        const res = await axios.post(backendUrl + '/api/user/register', {
-          name,
-          email,
-          password,
-        })
-
-        if (res.data.success) {
-          setToken(res.data.token)
-          localStorage.setItem('token', res.data.token)
-        } else {
-          toast.error(res.data.message)
-        }
-      } else {
-        const res = await axios.post(backendUrl + '/api/user/login', {
-          email,
-          password,
-        })
-
-        if (res.data.success) {
-          setToken(res.data.token)
-          localStorage.setItem('token', res.data.token)
-        } else {
-          toast.error(res.data.message)
-        }
-      }
-    } catch (error) {
-      console.log(error)
-      toast.error(error.message)
-    }
-  }
-
-  useEffect(() => {
-    if (token) {
-      navigate('/')
-    }
-  }, [token, navigate])
+  const isLogin = currentState === 'Login'
+  const isSignUp = currentState === 'Sign Up'
+  const nextState = isLogin ? 'Sign Up' : 'Login'
+  const stateToggleText = isLogin ? 'Create account' : 'Login Here'
+  const submitButtonText = isLogin ? 'Sign In' : 'Sign Up'
 
   return (
     <form
@@ -72,13 +27,11 @@ const Login = () => {
       className='flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800'
     >
       <div className='inline-flex items-center gap-2 mb-2 mt-10'>
-        <p className='prata-regular text-3xl'>{currentState}</p>
+        <h1 className='prata-regular text-3xl'>{currentState}</h1>
         <hr className='border-none h-[1.5px] w-8 bg-gray-800' />
       </div>
 
-      {currentState === 'Login' ? (
-        ''
-      ) : (
+      {isSignUp && (
         <input
           type='text'
           className='w-full px-3 py-2 border border-gray-800'
@@ -88,6 +41,7 @@ const Login = () => {
           value={name}
         />
       )}
+
       <input
         type='email'
         className='w-full px-3 py-2 border border-gray-800'
@@ -96,6 +50,7 @@ const Login = () => {
         onChange={(e) => setEmail(e.target.value)}
         value={email}
       />
+
       <input
         type='password'
         className='w-full px-3 py-2 border border-gray-800'
@@ -104,7 +59,8 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         value={password}
       />
-      {currentState === 'Sign Up' && (
+
+      {isSignUp && (
         <input
           type='password'
           className='w-full px-3 py-2 border border-gray-800'
@@ -116,30 +72,22 @@ const Login = () => {
       )}
 
       <div className='w-full flex justify-between text-sm mt-[-8px]'>
-        {currentState === 'Login' ? (
+        {isLogin ? (
           <p className='cursor-pointer'>Forgot your password?</p>
         ) : (
-          <span></span>
+          <span />
         )}
-        {currentState === 'Login' ? (
-          <p
-            onClick={() => setCurrentState('Sign Up')}
-            className='cursor-pointer'
-          >
-            Create account
-          </p>
-        ) : (
-          <p
-            onClick={() => setCurrentState('Login')}
-            className='cursor-pointer'
-          >
-            Login Here{' '}
-          </p>
-        )}
+
+        <p
+          onClick={() => setCurrentState(nextState)}
+          className='cursor-pointer'
+        >
+          {stateToggleText}
+        </p>
       </div>
 
       <button className='bg-black text-white font-light px-8 py-2 mt-4'>
-        {currentState === 'Login' ? 'Sign In' : 'Sign Up'}
+        {submitButtonText}
       </button>
     </form>
   )
