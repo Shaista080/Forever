@@ -1,16 +1,16 @@
-name: Frontend Tests
+name: Backend Tests
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-tests.yml'
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
   pull_request:
     paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-tests.yml'
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Frontend Unit Tests
+    name: Run Backend Unit & Integration Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -30,12 +30,12 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: ./frontend/package-lock.json
+          cache-dependency-path: ./backend/package-lock.json
 
       - name: Install Dependencies
         run: npm ci
-        working-directory: ./frontend
+        working-directory: ./backend
 
       - name: Run Tests
         run: npm test
-        working-directory: ./frontend
+        working-directory: ./backend
