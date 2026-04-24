@@ -17,7 +17,7 @@ const createWrapper = (contextValue) => {
   return Wrapper
 }
 
-describe('useAuthForm Hook (Sign-Up Logic)', () => {
+describe('useAuthForm Hook', () => {
   let mockNavigate
   let mockSetToken
   let localStorageSpy
@@ -203,6 +203,95 @@ describe('useAuthForm Hook (Sign-Up Logic)', () => {
     })
   })
 
+  describe('Login API Calls', () => {
+    it('should make a POST request to the login endpoint and handle success', async () => {
+      axios.post.mockResolvedValue({
+        data: { success: true, token: 'login-token' },
+      })
+      const { result } = renderAuthHook()
+
+      act(() => {
+        result.current.setEmail('john@test.com')
+        result.current.setPassword('Password123!')
+      })
+
+      await act(async () => {
+        await result.current.onSubmitHandler({ preventDefault: () => {} })
+      })
+
+      expect(axios.post).toHaveBeenCalledWith(
+        'http://localhost:1001/api/user/login',
+        {
+          email: 'john@test.com',
+          password: 'Password123!',
+        }
+      )
+      expect(mockSetToken).toHaveBeenCalledWith('login-token')
+      expect(localStorageSpy).toHaveBeenCalledWith('token', 'login-token')
+    })
+
+    it('should call toast.error with the API message on a failed login', async () => {
+      axios.post.mockResolvedValue({
+        data: { success: false, message: 'Invalid credentials' },
+      })
+      const { result } = renderAuthHook()
+
+      act(() => {
+        result.current.setEmail('john@test.com')
+        result.current.setPassword('Password123!')
+      })
+
+      await act(async () => {
+        await result.current.onSubmitHandler({ preventDefault: () => {} })
+      })
+
+      expect(toast.error).toHaveBeenCalledWith('Invalid credentials')
+      expect(mockSetToken).not.toHaveBeenCalled()
+    })
+
+    it('should call toast.error when login request throws', async () => {
+      axios.post.mockRejectedValue(new Error('Network error'))
+      const { result } = renderAuthHook()
+
+      act(() => {
+        result.current.setEmail('john@test.com')
+        result.current.setPassword('Password123!')
+      })
+
+      await act(async () => {
+        await result.current.onSubmitHandler({ preventDefault: () => {} })
+      })
+
+      expect(toast.error).toHaveBeenCalledWith('Network error')
+    })
+
+    it('should skip password validation and call the API directly', async () => {
+      axios.post.mockResolvedValue({
+        data: { success: true, token: 'login-token' },
+      })
+      const { result } = renderAuthHook()
+
+      act(() => {
+        result.current.setEmail('john@test.com')
+        result.current.setPassword('short') // No special char, under 8 chars
+      })
+
+      await act(async () => {
+        await result.current.onSubmitHandler({ preventDefault: () => {} })
+      })
+
+      // Login should NOT run validation — API should still be called
+      expect(toast.error).not.toHaveBeenCalled()
+      expect(axios.post).toHaveBeenCalledWith(
+        'http://localhost:1001/api/user/login',
+        {
+          email: 'john@test.com',
+          password: 'short',
+        }
+      )
+    })
+  })
+
   describe('Redirection Effect', () => {
     it('should not call navigate("/") on initial render if no token is present', () => {
       renderAuthHook({ token: null })
@@ -215,7 +304,7 @@ describe('useAuthForm Hook (Sign-Up Logic)', () => {
     })
   })
 
-  describe('Default state of Sign-up', () => {
+  describe('Default State', () => {
     it('should initialize with Login state and empty fields', () => {
       const { result } = renderAuthHook()
 
