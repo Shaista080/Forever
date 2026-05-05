@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import axios from 'axios'
 import { ShopContext } from '../context/ShopContext'
-import Login from './Login' // The component we are testing
-import { MemoryRouter } from 'react-router-dom' // To mock navigation
+import Login from './Login'
+import { MemoryRouter } from 'react-router-dom'
 
 // Mock external dependencies
 vi.mock('axios')
@@ -24,26 +24,20 @@ const renderWithContext = (contextValue) => {
   )
 }
 
-describe('Signup Form Integration Tests', () => {
+describe('Login Form Integration Tests', () => {
   let mockNavigate
   let mockSetToken
   let localStorageSpy
 
   beforeEach(() => {
-    // Reset mocks before each test
     vi.clearAllMocks()
-
-    // Default mock implementations
     mockNavigate = vi.fn()
     mockSetToken = vi.fn()
-    axios.post.mockResolvedValue({ data: {} }) // Default happy path
-
-    // Spy on localStorage
+    axios.post.mockResolvedValue({ data: {} })
     localStorageSpy = vi.spyOn(Storage.prototype, 'setItem')
   })
 
   afterEach(() => {
-    // Restore localStorage spy
     localStorageSpy.mockRestore()
     localStorage.clear()
   })
@@ -55,36 +49,25 @@ describe('Signup Form Integration Tests', () => {
     backendUrl: 'http://localhost:1001',
   })
 
-  // Test 1: Successful Signup
-  it('should handle successful signup, store token, and navigate to home', async () => {
-    // Arrange: Mock a successful API response
+  it('should handle successful login, store token, and navigate to home', async () => {
     axios.post.mockResolvedValue({
       data: { success: true, token: 'fake-jwt-token' },
     })
     renderWithContext(getContextValue())
 
-    // Act: Switch to signup and fill out the form
-    fireEvent.click(screen.getByText('Create account'))
-    fireEvent.change(screen.getByPlaceholderText('Name'), {
-      target: { value: 'Test User' },
-    })
+    // Fill and submit the login form (default state is Login)
     fireEvent.change(screen.getByPlaceholderText('Email'), {
       target: { value: 'test@example.com' },
     })
     fireEvent.change(screen.getByPlaceholderText('Password'), {
       target: { value: 'Password123!' },
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), {
-      target: { value: 'Password123!' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
 
-    // Assert: Check API call, token storage, and navigation
     await waitFor(() => {
       expect(axios.post).toHaveBeenCalledWith(
-        'http://localhost:1001/api/user/register',
+        'http://localhost:1001/api/user/login',
         {
-          name: 'Test User',
           email: 'test@example.com',
           password: 'Password123!',
         }
@@ -97,66 +80,46 @@ describe('Signup Form Integration Tests', () => {
     })
   })
 
-  // Test 2: Signup with an existing email
-  it('should show an error message when signing up with an existing email', async () => {
-    // Arrange: Mock an API response for a duplicate user
+  it('should show an error toast and not store a token when login fails', async () => {
     axios.post.mockResolvedValue({
-      data: { success: false, message: 'User already exists' },
+      data: { success: false, message: 'Invalid Credentials' },
     })
     const { toast } = await import('react-toastify')
     renderWithContext(getContextValue())
 
-    // Act: Fill and submit the form
-    fireEvent.click(screen.getByText('Create account'))
-    fireEvent.change(screen.getByPlaceholderText('Name'), {
-      target: { value: 'Test User' },
-    })
     fireEvent.change(screen.getByPlaceholderText('Email'), {
-      target: { value: 'existing@example.com' },
+      target: { value: 'test@example.com' },
     })
     fireEvent.change(screen.getByPlaceholderText('Password'), {
-      target: { value: 'Password123!' },
+      target: { value: 'wrongpassword' },
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), {
-      target: { value: 'Password123!' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
 
-    // Assert: Check for the error toast and that no token is set
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('User already exists')
+      expect(toast.error).toHaveBeenCalledWith('Invalid Credentials')
     })
 
     expect(mockSetToken).not.toHaveBeenCalled()
     expect(localStorageSpy).not.toHaveBeenCalled()
-    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
-  // Test 3: Signup with non-matching passwords
-  it('should show a validation error if passwords do not match', async () => {
+  it('should show an error when the network request fails', async () => {
+    axios.post.mockRejectedValue(new Error('Network Error'))
     const { toast } = await import('react-toastify')
     renderWithContext(getContextValue())
 
-    // Act: Fill form with non-matching passwords
-    fireEvent.click(screen.getByText('Create account'))
-    fireEvent.change(screen.getByPlaceholderText('Name'), {
-      target: { value: 'Test User' },
-    })
     fireEvent.change(screen.getByPlaceholderText('Email'), {
       target: { value: 'test@example.com' },
     })
     fireEvent.change(screen.getByPlaceholderText('Password'), {
       target: { value: 'Password123!' },
     })
-    fireEvent.change(screen.getByPlaceholderText('Confirm Password'), {
-      target: { value: 'WrongPassword' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: 'Sign Up' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
 
-    // Assert: Check for the validation error and that no API call was made
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Passwords don't match")
+      expect(toast.error).toHaveBeenCalledWith('Network Error')
     })
-    expect(axios.post).not.toHaveBeenCalled()
+
+    expect(mockSetToken).not.toHaveBeenCalled()
   })
 })

@@ -6,75 +6,95 @@ import useAuthForm from '../hooks/useAuthForm'
 // Mock the custom hook
 vi.mock('../hooks/useAuthForm')
 
-describe('Login Component (Login State)', () => {
+describe('Login Component (Sign Up State)', () => {
+  // Create mock functions that can be reused in tests
   const mockSetCurrentState = vi.fn()
+  const mockSetName = vi.fn()
   const mockSetEmail = vi.fn()
   const mockSetPassword = vi.fn()
+  const mockSetConfirmPassword = vi.fn()
   const mockOnSubmitHandler = vi.fn((e) => e.preventDefault())
 
+  // Set a default mock implementation for all tests
   const mockAuthForm = (overrides = {}) => {
     useAuthForm.mockReturnValue({
-      currentState: 'Login',
+      currentState: 'Sign Up',
       name: '',
       email: '',
       password: '',
       confirmPassword: '',
       setCurrentState: mockSetCurrentState,
-      setName: vi.fn(),
+      setName: mockSetName,
       setEmail: mockSetEmail,
       setPassword: mockSetPassword,
-      setConfirmPassword: vi.fn(),
+      setConfirmPassword: mockSetConfirmPassword,
       onSubmitHandler: mockOnSubmitHandler,
       ...overrides,
     })
   }
 
   beforeEach(() => {
+    // Reset mocks before each test
     vi.clearAllMocks()
     mockAuthForm()
   })
 
   describe('Rendering', () => {
-    it('should render the login form correctly (default state is Login)', () => {
+    it('should render the complete Sign Up form correctly', () => {
       render(<Login />)
 
       // Assert titles and buttons
       expect(
-        screen.getByRole('heading', { name: /Login/i })
+        screen.getByRole('heading', { name: /Sign Up/i })
       ).toBeInTheDocument()
       expect(
-        screen.getByRole('button', { name: /Sign In/i })
+        screen.getByRole('button', { name: /Sign Up/i })
       ).toBeInTheDocument()
-      expect(screen.getByText('Create account')).toBeInTheDocument()
-      expect(screen.getByText('Forgot your password?')).toBeInTheDocument()
+      expect(screen.getByText('Login Here')).toBeInTheDocument()
 
       // Assert input fields are present
+      expect(screen.getByPlaceholderText('Name')).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Email')).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
-
-      // Assert Sign Up-only elements are NOT present
-      expect(screen.queryByPlaceholderText('Name')).not.toBeInTheDocument()
       expect(
-        screen.queryByPlaceholderText('Confirm Password')
+        screen.getByPlaceholderText('Confirm Password')
+      ).toBeInTheDocument()
+
+      // Assert elements that should NOT be present
+      expect(
+        screen.queryByText('Forgot your password?')
       ).not.toBeInTheDocument()
     })
 
     it('should render input values from the hook', () => {
       mockAuthForm({
+        name: 'John',
         email: 'john@test.com',
         password: 'Password123!',
+        confirmPassword: 'Password123!',
       })
 
       render(<Login />)
 
+      expect(screen.getByPlaceholderText('Name')).toHaveValue('John')
       expect(screen.getByPlaceholderText('Email')).toHaveValue('john@test.com')
       expect(screen.getByPlaceholderText('Password')).toHaveValue(
+        'Password123!'
+      )
+      expect(screen.getByPlaceholderText('Confirm Password')).toHaveValue(
         'Password123!'
       )
     })
   })
 
   describe('User Interactions', () => {
+    it('should call setName when user types in the name field', () => {
+      render(<Login />)
+      const nameInput = screen.getByPlaceholderText('Name')
+      fireEvent.change(nameInput, { target: { value: 'John' } })
+      expect(mockSetName).toHaveBeenCalledWith('John')
+    })
+
     it('should call setEmail when user types in the email field', () => {
       render(<Login />)
       const emailInput = screen.getByPlaceholderText('Email')
@@ -89,23 +109,33 @@ describe('Login Component (Login State)', () => {
       expect(mockSetPassword).toHaveBeenCalledWith('pass123')
     })
 
-    it('should call onSubmitHandler when the Sign In button is clicked', () => {
+    it('should call setConfirmPassword when user types in the confirm password field', () => {
+      render(<Login />)
+      const confirmPasswordInput =
+        screen.getByPlaceholderText('Confirm Password')
+      fireEvent.change(confirmPasswordInput, { target: { value: 'pass123' } })
+      expect(mockSetConfirmPassword).toHaveBeenCalledWith('pass123')
+    })
+
+    it('should call onSubmitHandler when the Sign Up button is clicked', () => {
       mockAuthForm({
+        name: 'John',
         email: 'john@test.com',
         password: 'Password123!',
+        confirmPassword: 'Password123!',
       })
       render(<Login />)
 
-      const signInButton = screen.getByRole('button', { name: /Sign In/i })
-      fireEvent.click(signInButton)
+      const signUpButton = screen.getByRole('button', { name: /Sign Up/i })
+      fireEvent.click(signUpButton)
       expect(mockOnSubmitHandler).toHaveBeenCalledTimes(1)
     })
 
-    it('should call setCurrentState when the "Create account" link is clicked', () => {
+    it('should call setCurrentState when the "Login Here" link is clicked', () => {
       render(<Login />)
-      const createAccountLink = screen.getByText('Create account')
-      fireEvent.click(createAccountLink)
-      expect(mockSetCurrentState).toHaveBeenCalledWith('Sign Up')
+      const loginLink = screen.getByText('Login Here')
+      fireEvent.click(loginLink)
+      expect(mockSetCurrentState).toHaveBeenCalledWith('Login')
     })
   })
 })
