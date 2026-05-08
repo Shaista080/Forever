@@ -41,9 +41,10 @@ jobs:
         working-directory: ./frontend
 
       - name: Post Coverage Comment
-        uses: romeovs/lcov-reporter-action@v0.4.0
         if: github.event_name == 'pull_request'
-        with:
-          lcov-file: ./frontend/coverage/lcov.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Frontend Coverage Report"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LCOV_FILE: ./frontend/coverage/lcov.info
+          REPORT_TITLE: Frontend Coverage Report
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node .github/scripts/post-coverage-comment.js
