@@ -10,5 +10,18 @@ export default defineConfig({
     globals: true, // This makes Vitest automatically import the describe, it, and expect functions into every test file
     environment: 'jsdom', // It tells Vitest to run the tests in a simulated browser environment provided by jsdom
     setupFiles: './src/setupTests.js', //This tells Vitest to run a specific file before it runs any of your tests
+    coverage: {
+      provider: 'v8',
+      reporter: ['html', 'text', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.{js,jsx}'],
+      exclude: [
+        'src/main.jsx',
+        'src/setupTests.js',
+        'src/App.jsx',
+        'src/assets/**',
+        'src/**/*.test.{js,jsx}',
+      ],
+    },
   },
 })

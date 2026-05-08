@@ -1,3 +1,7 @@
 node_modules
+.DS_Store
+.claude/
 graphify-out
 *.env
+coverage/
+.graphifyignore

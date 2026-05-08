@@ -36,6 +36,15 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
-      - name: Run Tests
-        run: npm test
+      - name: Run Tests & Coverage
+        run: npm run test:coverage
         working-directory: ./frontend
+
+      - name: Post Coverage Comment
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LCOV_FILE: ./frontend/coverage/lcov.info
+          REPORT_TITLE: Frontend Coverage Report
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node .github/scripts/post-coverage-comment.js
