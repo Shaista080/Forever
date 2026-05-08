@@ -36,6 +36,14 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
-      - name: Run Tests
-        run: npm test
+      - name: Run Tests & Coverage
+        run: npm run test:coverage
         working-directory: ./frontend
+
+      - name: Post Coverage Comment
+        uses: romeovs/lcov-reporter-action@v0.4.0
+        if: github.event_name == 'pull_request'
+        with:
+          lcov-file: ./frontend/coverage/lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Frontend Coverage Report"
