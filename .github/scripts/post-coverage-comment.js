@@ -83,38 +83,62 @@ function buildComment({ files, totals }) {
   return md
 }
 
-function postComment(body) {
+function request(options, payload) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', (chunk) => (data += chunk))
+      res.on('end', () => resolve({ status: res.statusCode, body: data }))
+    })
+    req.on('error', reject)
+    if (payload) req.write(payload)
+    req.end()
+  })
+}
+
+async function upsertComment(body) {
   const [owner, repoName] = repo.split('/')
-  const payload = JSON.stringify({ body })
-  const options = {
-    hostname: 'api.github.com',
-    path: `/repos/${owner}/${repoName}/issues/${prNumber}/comments`,
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'User-Agent': 'coverage-reporter',
-      'Content-Length': Buffer.byteLength(payload),
-    },
+  const baseHeaders = {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    'User-Agent': 'coverage-reporter',
   }
 
-  const req = https.request(options, (res) => {
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      console.log(`Coverage comment posted (HTTP ${res.statusCode})`)
-    } else {
-      console.error(`Failed to post comment: HTTP ${res.statusCode}`)
-      process.exit(1)
-    }
+  // Find existing comment matching this report title
+  const listRes = await request({
+    hostname: 'api.github.com',
+    path: `/repos/${owner}/${repoName}/issues/${prNumber}/comments?per_page=100`,
+    method: 'GET',
+    headers: baseHeaders,
   })
 
-  req.on('error', (e) => {
-    console.error(e.message)
+  const comments = JSON.parse(listRes.body)
+  const marker = `### ${title}`
+  const existing = comments.find?.(
+    (c) => c.user?.type === 'Bot' && c.body?.startsWith(marker)
+  )
+
+  const payload = JSON.stringify({ body })
+  const isUpdate = !!existing
+  const path = isUpdate
+    ? `/repos/${owner}/${repoName}/issues/comments/${existing.id}`
+    : `/repos/${owner}/${repoName}/issues/${prNumber}/comments`
+
+  const res = await request({
+    hostname: 'api.github.com',
+    path,
+    method: isUpdate ? 'PATCH' : 'POST',
+    headers: { ...baseHeaders, 'Content-Length': Buffer.byteLength(payload) },
+  }, payload)
+
+  if (res.status >= 200 && res.status < 300) {
+    console.log(`Coverage comment ${isUpdate ? 'updated' : 'posted'} (HTTP ${res.status})`)
+  } else {
+    console.error(`Failed: HTTP ${res.status} — ${res.body}`)
     process.exit(1)
-  })
-  req.write(payload)
-  req.end()
+  }
 }
 
 const parsed = parseLcov(lcovFile)
 const comment = buildComment(parsed)
-postComment(comment)
+upsertComment(comment)
