@@ -136,4 +136,4 @@ npm run dev
   Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
   NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images.
 
-/test
+/testtest
