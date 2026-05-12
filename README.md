@@ -124,8 +124,8 @@ To provide a consistent and populated development environment, the database seed
   The seeding process is integrated into the backend development server startup.
   1.  **Start the Backend Development Server:** In the `/backend` directory, run:
       `bash
-    npm run dev
-    `
+npm run dev
+`
       This command will automatically:
   - Connect to MongoDB.
   - Clear all existing product data.
@@ -135,3 +135,5 @@ To provide a consistent and populated development environment, the database seed
 
   Ensure your `.env` file is correctly configured with your MongoDB and Cloudinary credentials before running the script.
   NOTE: DB seeding could take up to 30 seconds, depending on the number of products and images.
+
+/test
