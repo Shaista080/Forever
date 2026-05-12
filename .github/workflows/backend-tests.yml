@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
-      - '.github/workflows/backend-tests.yml'
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
   pull_request:
     paths:
-      - 'backend/**'
-      - '.github/workflows/backend-tests.yml'
+      - "backend/**"
+      - ".github/workflows/backend-tests.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
