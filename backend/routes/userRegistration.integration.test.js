@@ -50,7 +50,7 @@ describe('POST /api/user/register', () => {
     password: 'validpass123',
   }
 
-  it('registers successfully, returns a token, and the token contains the user id', async () => {
+  it('registers successfully, returns a token, and the token contains the user id, role, and expiry', async () => {
     const res = await request(app).post('/api/user/register').send(validBody)
 
     expect(res.body.success).toBe(true)
@@ -58,6 +58,20 @@ describe('POST /api/user/register', () => {
 
     const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET)
     expect(decoded.id).toBeDefined()
+    expect(decoded.role).toBe('user')
+    // exp is a unix timestamp in seconds; iat (issued-at) is also set.
+    // exp should be ~3 days from now.
+    expect(decoded.exp).toBeDefined()
+    expect(decoded.iat).toBeDefined()
+    const threeDaysInSeconds = 3 * 24 * 60 * 60
+    expect(decoded.exp - decoded.iat).toBe(threeDaysInSeconds)
+  })
+
+  it("persists a new user with role 'user' by default", async () => {
+    await request(app).post('/api/user/register').send(validBody)
+
+    const user = await userModel.findOne({ email: validBody.email })
+    expect(user.role).toBe('user')
   })
 
   it('stores the password as a bcrypt hash, not as plaintext', async () => {

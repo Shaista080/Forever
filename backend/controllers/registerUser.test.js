@@ -175,7 +175,7 @@ describe('registerUser', () => {
   it('returns { success: true, token } on valid input', async () => {
     mockFindOne.mockResolvedValue(null)
     bcrypt.hash.mockResolvedValue('hashedPassword')
-    mockSave.mockResolvedValue({ _id: 'new-user-id' })
+    mockSave.mockResolvedValue({ _id: 'new-user-id', role: 'user' })
     jwt.sign.mockReturnValue('fake-token')
 
     const { req, res } = makeReqRes({
@@ -190,5 +190,26 @@ describe('registerUser', () => {
       success: true,
       token: 'fake-token',
     })
+  })
+
+  it("signs the JWT with the user's id, role 'user', and a 3d expiry", async () => {
+    mockFindOne.mockResolvedValue(null)
+    bcrypt.hash.mockResolvedValue('hashedPassword')
+    mockSave.mockResolvedValue({ _id: 'new-user-id', role: 'user' })
+    jwt.sign.mockReturnValue('fake-token')
+
+    const { req, res } = makeReqRes({
+      name: 'Alice',
+      email: 'alice@example.com',
+      password: 'validpass123',
+    })
+
+    await registerUser(req, res)
+
+    expect(jwt.sign).toHaveBeenCalledWith(
+      { id: 'new-user-id', role: 'user' },
+      'test-secret',
+      { expiresIn: '3d' }
+    )
   })
 })

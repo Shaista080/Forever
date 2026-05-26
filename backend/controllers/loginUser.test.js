@@ -98,6 +98,7 @@ describe('loginUser', () => {
     mockFindOne.mockResolvedValue({
       _id: 'user-id-123',
       password: 'hashedPassword',
+      role: 'user',
     })
     bcrypt.compare.mockResolvedValue(true)
     jwt.sign.mockReturnValue('fake-token')
@@ -109,7 +110,11 @@ describe('loginUser', () => {
 
     await loginUser(req, res)
 
-    expect(jwt.sign).toHaveBeenCalledWith({ id: 'user-id-123' }, 'test-secret')
+    expect(jwt.sign).toHaveBeenCalledWith(
+      { id: 'user-id-123', role: 'user' },
+      'test-secret',
+      { expiresIn: '3d' }
+    )
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       token: 'fake-token',

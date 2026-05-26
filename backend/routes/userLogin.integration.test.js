@@ -56,7 +56,7 @@ const seedUser = async (
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 describe('POST /api/user/login', () => {
-  it('logs in successfully and returns a token containing the user id', async () => {
+  it('logs in successfully and returns a token containing the user id, role, and expiry', async () => {
     const user = await seedUser()
 
     const res = await request(app).post('/api/user/login').send({
@@ -69,6 +69,11 @@ describe('POST /api/user/login', () => {
 
     const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET)
     expect(decoded.id).toBe(user._id.toString())
+    expect(decoded.role).toBe('user')
+    expect(decoded.exp).toBeDefined()
+    expect(decoded.iat).toBeDefined()
+    const threeDaysInSeconds = 3 * 24 * 60 * 60
+    expect(decoded.exp - decoded.iat).toBe(threeDaysInSeconds)
   })
 
   it('returns success: false when the email does not exist', async () => {

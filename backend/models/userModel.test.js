@@ -75,4 +75,26 @@ describe('userModel schema', () => {
     const duplicate = new userModel({ ...validUser, name: 'Bob' })
     await expect(duplicate.save()).rejects.toThrow(/duplicate key|E11000/)
   })
+
+  it("defaults role to 'user' when not provided", async () => {
+    const user = new userModel(validUser)
+    const saved = await user.save()
+    expect(saved.role).toBe('user')
+  })
+
+  it("accepts 'admin' as a valid role when explicitly set", async () => {
+    const user = new userModel({ ...validUser, role: 'admin' })
+    const saved = await user.save()
+    expect(saved.role).toBe('admin')
+  })
+
+  it('throws a validation error when role is set to an invalid value', async () => {
+    const user = new userModel({ ...validUser, role: 'superadmin' })
+    await expect(user.save()).rejects.toThrow(/role/)
+  })
+
+  it('throws a validation error when role is explicitly set to null', async () => {
+    const user = new userModel({ ...validUser, role: null })
+    await expect(user.save()).rejects.toThrow(/role/)
+  })
 })
