@@ -4,8 +4,12 @@ import jwt from 'jsonwebtoken'
 
 import userModel from '../models/userModel.js'
 
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET)
+const TOKEN_EXPIRY = '3d'
+
+const createToken = (id, role = 'user') => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    expiresIn: TOKEN_EXPIRY,
+  })
 }
 
 export const validateRegistrationInput = (email, password) => {
@@ -31,7 +35,7 @@ export const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (isMatch) {
-      const token = createToken(user._id)
+      const token = createToken(user._id, user.role)
       res.json({ success: true, token })
     } else {
       return res.json({ success: false, message: 'Invalid Credentials' })
@@ -69,7 +73,7 @@ export const registerUser = async (req, res) => {
 
     const user = await newUser.save()
 
-    const token = createToken(user._id)
+    const token = createToken(user._id, user.role)
 
     res.json({ success: true, token })
   } catch (e) {
@@ -83,21 +87,27 @@ export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(
-        { id: 'admin', role: 'admin' },
-        process.env.JWT_SECRET
-      )
-      res.json({ success: true, token })
-    } else {
-      res.json({
-        success: false,
-        message: 'Invalid Credentials',
-      })
+    if (!email || !password) {
+      return res.json({ success: false, message: 'Invalid Credentials' })
     }
+
+    const lowerCaseEmail = email.toLowerCase()
+    const user = await userModel.findOne({
+      email: lowerCaseEmail,
+      role: 'admin',
+    })
+
+    if (!user) {
+      return res.json({ success: false, message: 'Invalid Credentials' })
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return res.json({ success: false, message: 'Invalid Credentials' })
+    }
+
+    const token = createToken(user._id, user.role)
+    res.json({ success: true, token })
   } catch (e) {
     console.log(e)
     res.json({ success: false, message: e.message })
