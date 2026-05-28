@@ -20,6 +20,9 @@ let mongoServer
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create()
   await mongoose.connect(mongoServer.getUri())
+  // Wait for the unique email index to finish building before any inserts,
+  // otherwise the duplicate-key test can race the background index build.
+  await userModel.init()
 })
 
 afterAll(async () => {
