@@ -31,9 +31,7 @@ describe('Admin Login Component', () => {
       expect(
         screen.getByRole('heading', { name: /Admin Panel/i })
       ).toBeInTheDocument()
-      expect(
-        screen.getByRole('button', { name: /Login/i })
-      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Login/i })).toBeInTheDocument()
 
       expect(screen.getByPlaceholderText('your@email.com')).toBeInTheDocument()
       expect(
