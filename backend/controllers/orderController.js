@@ -115,7 +115,7 @@ export const verifyStripe = async (req, res) => {
 export const placeOrderRazorpay = async () => {}
 
 //ALL ORDERS DATA FOR ADMIN PANEL
-export const allOrders = async (res) => {
+export const allOrders = async (req, res) => {
   try {
     const orders = await orderModel.find()
     res.json({ success: true, orders })
