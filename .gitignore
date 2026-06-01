@@ -5,4 +5,5 @@ graphify-out
 *.env
 coverage/
 .graphifyignore
+testing/
 dev-commands.sh
