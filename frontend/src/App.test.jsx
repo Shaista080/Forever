@@ -65,9 +65,9 @@ describe('App', () => {
 
   it('renders layout in correct order', () => {
     const { container } = renderAt('/')
-    const order = Array.from(
-      container.querySelectorAll('[data-testid]')
-    ).map((el) => el.getAttribute('data-testid'))
+    const order = Array.from(container.querySelectorAll('[data-testid]')).map(
+      (el) => el.getAttribute('data-testid')
+    )
     expect(order).toEqual([
       'toast-container',
       'navbar',

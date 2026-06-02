@@ -39,7 +39,9 @@ describe('About Page', () => {
     expect(
       screen.getByText(/With our user-friendly interface/i)
     ).toBeInTheDocument()
-    expect(screen.getByText('Exceptional Customer Service:')).toBeInTheDocument()
+    expect(
+      screen.getByText('Exceptional Customer Service:')
+    ).toBeInTheDocument()
     expect(
       screen.getByText(/Our team of dedicated professionals/i)
     ).toBeInTheDocument()
@@ -52,9 +54,9 @@ describe('About Page', () => {
 
   it('renders sections in correct order', () => {
     const { container } = render(<About />)
-    const markers = Array.from(
-      container.querySelectorAll('[data-testid]')
-    ).map((el) => el.getAttribute('data-testid'))
+    const markers = Array.from(container.querySelectorAll('[data-testid]')).map(
+      (el) => el.getAttribute('data-testid')
+    )
     expect(markers).toEqual([
       'title-ABOUT-US',
       'title-WHY-CHOOSE US',

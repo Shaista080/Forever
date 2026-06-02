@@ -41,9 +41,9 @@ describe('Contact Page', () => {
 
   it('renders sections in correct order', () => {
     const { container } = render(<Contact />)
-    const markers = Array.from(
-      container.querySelectorAll('[data-testid]')
-    ).map((el) => el.getAttribute('data-testid'))
+    const markers = Array.from(container.querySelectorAll('[data-testid]')).map(
+      (el) => el.getAttribute('data-testid')
+    )
     expect(markers).toEqual(['title-CONTACT-US', 'newsletter-box'])
   })
 })
