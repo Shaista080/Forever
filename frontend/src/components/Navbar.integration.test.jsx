@@ -103,9 +103,7 @@ describe('Navbar Integration', () => {
 
     const paths = ['/collection', '/about', '/contact', '/']
     paths.forEach((path) => {
-      fireEvent.click(
-        container.querySelector(`img[src="${assets.menu_icon}"]`)
-      )
+      fireEvent.click(container.querySelector(`img[src="${assets.menu_icon}"]`))
       const link = sidebar.querySelector(`a[href="${path}"]`)
       fireEvent.click(link)
       expect(screen.getByTestId('location')).toHaveTextContent(path)
