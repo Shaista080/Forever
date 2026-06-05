@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { useState } from 'react'
 import {
   MemoryRouter,
   Routes,
@@ -8,6 +9,7 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import Navbar from './Navbar'
+import SearchBar from './SearchBar'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 
@@ -16,30 +18,50 @@ const LocationProbe = () => {
   return <div data-testid='location'>{loc.pathname}</div>
 }
 
-const NavigateBridge = ({ ctxOverrides = {}, children }) => {
+const ContextBridge = ({ ctxOverrides = {}, children }) => {
   const navigate = useNavigate()
+  const [showSearch, setShowSearch] = useState(
+    ctxOverrides.initialShowSearch ?? false
+  )
+  const [search, setSearch] = useState('')
   const value = {
-    setShowSearch: vi.fn(),
-    getCartCount: vi.fn(() => 0),
+    navigate,
+    showSearch,
+    setShowSearch,
+    search,
+    setSearch,
+    getCartCount: () => 0,
     token: '',
     setToken: vi.fn(),
     setCartItems: vi.fn(),
-    navigate,
     ...ctxOverrides,
   }
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>
 }
 
-const renderNavbar = (ctxOverrides = {}, initialPath = '/') =>
+const renderWith = (children, { ctxOverrides = {}, initialPath = '/' } = {}) =>
   render(
     <MemoryRouter initialEntries={[initialPath]}>
-      <NavigateBridge ctxOverrides={ctxOverrides}>
-        <Navbar />
-      </NavigateBridge>
+      <ContextBridge ctxOverrides={ctxOverrides}>{children}</ContextBridge>
       <Routes>
         <Route path='*' element={<LocationProbe />} />
       </Routes>
     </MemoryRouter>
+  )
+
+const renderNavbar = (ctxOverrides = {}, initialPath = '/') =>
+  renderWith(<Navbar />, { ctxOverrides, initialPath })
+
+const renderNavbarWithSearch = (
+  ctxOverrides = {},
+  initialPath = '/collection'
+) =>
+  renderWith(
+    <>
+      <Navbar />
+      <SearchBar />
+    </>,
+    { ctxOverrides, initialPath }
   )
 
 describe('Navbar Integration', () => {
@@ -94,6 +116,33 @@ describe('Navbar Integration', () => {
     renderNavbar({ token: 'abc123' })
     fireEvent.click(screen.getByText('Logout'))
     expect(screen.getByTestId('location')).toHaveTextContent('/login')
+  })
+
+  it('clicking Navbar search icon on /collection shows SearchBar input', () => {
+    const { container } = renderNavbarWithSearch({}, '/collection')
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
+    fireEvent.click(
+      container.querySelector(`img[src="${assets.search_icon}"]`)
+    )
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
+  })
+
+  it('clicking Navbar search icon on non-collection route does NOT show SearchBar input', () => {
+    const { container } = renderNavbarWithSearch({}, '/about')
+    fireEvent.click(
+      container.querySelector(`img[src="${assets.search_icon}"]`)
+    )
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
+  })
+
+  it('clicking cross icon in SearchBar hides input', () => {
+    const { container } = renderNavbarWithSearch(
+      { initialShowSearch: true },
+      '/collection'
+    )
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
+    fireEvent.click(container.querySelector(`img[src="${assets.cross_icon}"]`))
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
   })
 
   it('clicking each mobile sidebar NavLink navigates to correct path', () => {
