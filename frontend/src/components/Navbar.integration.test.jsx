@@ -121,17 +121,13 @@ describe('Navbar Integration', () => {
   it('clicking Navbar search icon on /collection shows SearchBar input', () => {
     const { container } = renderNavbarWithSearch({}, '/collection')
     expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
-    fireEvent.click(
-      container.querySelector(`img[src="${assets.search_icon}"]`)
-    )
+    fireEvent.click(container.querySelector(`img[src="${assets.search_icon}"]`))
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
   })
 
   it('clicking Navbar search icon on non-collection route does NOT show SearchBar input', () => {
     const { container } = renderNavbarWithSearch({}, '/about')
-    fireEvent.click(
-      container.querySelector(`img[src="${assets.search_icon}"]`)
-    )
+    fireEvent.click(container.querySelector(`img[src="${assets.search_icon}"]`))
     expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
   })
 
