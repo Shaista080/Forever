@@ -18,9 +18,7 @@ const LocationProbe = () => {
   return <div data-testid='location'>{loc.pathname}</div>
 }
 
-const ProductPageStub = () => (
-  <div data-testid='product-page'>Product Page</div>
-)
+const ProductPageStub = () => <div data-testid='product-page'>Product Page</div>
 
 const makeProducts = () => [
   {

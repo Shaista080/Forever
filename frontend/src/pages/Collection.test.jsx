@@ -19,7 +19,6 @@ vi.mock('../components/ProductItem', () => ({
   ),
 }))
 
-
 const makeProduct = (id, overrides = {}) => ({
   _id: `id-${id}`,
   name: `Product ${id}`,
@@ -67,11 +66,7 @@ describe('Collection Page', () => {
     })
 
     it('renders all products when no filters active', () => {
-      const products = [
-        makeProduct(1),
-        makeProduct(2),
-        makeProduct(3),
-      ]
+      const products = [makeProduct(1), makeProduct(2), makeProduct(3)]
       renderCollection({ products })
       expect(screen.getAllByTestId('product-item')).toHaveLength(3)
     })
