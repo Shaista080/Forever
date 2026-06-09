@@ -94,5 +94,4 @@ describe('POST /api/product/single', () => {
     expect(res.body.product.name).toBe('Green Jacket')
     expect(res.body.product._id).toBe(seeded._id.toString())
   })
-
 })
