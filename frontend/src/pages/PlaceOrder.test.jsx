@@ -135,11 +135,9 @@ describe('PlaceOrder Page', () => {
     })
 
     it('toasts an error and does not navigate when the server returns success false', async () => {
-      axios.post = vi
-        .fn()
-        .mockResolvedValue({
-          data: { success: false, message: 'Out of stock' },
-        })
+      axios.post = vi.fn().mockResolvedValue({
+        data: { success: false, message: 'Out of stock' },
+      })
 
       const { container } = renderPage()
       fillForm()
