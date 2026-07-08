@@ -62,8 +62,7 @@ const fillForm = () => {
 
 // Submit via the form element — button click runs jsdom constraint validation
 // and would block on the many `required` fields.
-const submit = (container) =>
-  fireEvent.submit(container.querySelector('form'))
+const submit = (container) => fireEvent.submit(container.querySelector('form'))
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -119,7 +118,14 @@ describe('PlaceOrder Page', () => {
       expect(url).toContain('/api/order/place')
       expect(body.amount).toBe(210) // 200 + 10
       expect(body.items).toEqual([
-        { _id: 'p1', name: 'Shirt', price: 100, image: ['s.png'], size: 'M', quantity: 2 },
+        {
+          _id: 'p1',
+          name: 'Shirt',
+          price: 100,
+          image: ['s.png'],
+          size: 'M',
+          quantity: 2,
+        },
       ])
       expect(body.address.firstName).toBe('Alice')
       expect(config.headers.Authorization).toBe('Bearer tok')
@@ -131,7 +137,9 @@ describe('PlaceOrder Page', () => {
     it('toasts an error and does not navigate when the server returns success false', async () => {
       axios.post = vi
         .fn()
-        .mockResolvedValue({ data: { success: false, message: 'Out of stock' } })
+        .mockResolvedValue({
+          data: { success: false, message: 'Out of stock' },
+        })
 
       const { container } = renderPage()
       fillForm()
@@ -147,7 +155,9 @@ describe('PlaceOrder Page', () => {
     it('skips cart entries with quantity 0 and products not found', async () => {
       axios.post = vi.fn().mockResolvedValue({ data: { success: true } })
 
-      const { container } = renderPage({ cartItems: { p1: { M: 2, L: 0 }, ghost: { S: 3 } } })
+      const { container } = renderPage({
+        cartItems: { p1: { M: 2, L: 0 }, ghost: { S: 3 } },
+      })
       fillForm()
       submit(container)
 

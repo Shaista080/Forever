@@ -16,7 +16,9 @@ const LocationProbe = () => {
   return <div data-testid='location'>{loc.pathname}</div>
 }
 
-const products = [{ _id: 'p1', name: 'Blue Shirt', price: 100, image: ['b.png'] }]
+const products = [
+  { _id: 'p1', name: 'Blue Shirt', price: 100, image: ['b.png'] },
+]
 
 // Full PlaceOrder page through the real ShopContext + router. Cart seeded via
 // the on-mount getUserCart fetch; only the network boundary (axios) is mocked.
@@ -36,7 +38,10 @@ const renderPlaceOrder = (cartData = { p1: { M: 2 } }) => {
       <ShopContextProvider>
         <Routes>
           <Route path='/place-order' element={<PlaceOrder />} />
-          <Route path='/orders' element={<div data-testid='orders'>Orders</div>} />
+          <Route
+            path='/orders'
+            element={<div data-testid='orders'>Orders</div>}
+          />
           <Route path='/cart' element={<Cart />} />
         </Routes>
         <LocationProbe />

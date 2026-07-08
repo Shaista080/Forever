@@ -48,7 +48,10 @@ const seedUser = async () => {
     password: 'hashed',
     cartData: {},
   })
-  const token = jwt.sign({ id: user._id.toString(), role: 'user' }, 'test-secret')
+  const token = jwt.sign(
+    { id: user._id.toString(), role: 'user' },
+    'test-secret'
+  )
   return { user, token, auth: `Bearer ${token}` }
 }
 

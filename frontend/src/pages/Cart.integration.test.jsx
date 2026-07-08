@@ -70,7 +70,9 @@ describe('Cart Page (integration)', () => {
   it('updating a quantity flows through real updateQuantity and recomputes the subtotal', async () => {
     renderCart({ p1: { M: 2 } }) // subtotal 2 * 100 = 200
 
-    await waitFor(() => expect(screen.getByText('Blue Shirt')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText('Blue Shirt')).toBeInTheDocument()
+    )
     // CartTotal subtotal line: "$ 200.00"
     expect(screen.getByText(/\$\s*200\.00/)).toBeInTheDocument()
 
@@ -106,7 +108,9 @@ describe('Cart Page (integration)', () => {
   it('checkout navigates to /place-order via the real router', async () => {
     renderCart({ p1: { M: 2 } })
 
-    await waitFor(() => expect(screen.getByText('Blue Shirt')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText('Blue Shirt')).toBeInTheDocument()
+    )
     fireEvent.click(screen.getByRole('button', { name: 'PROCEED TO CHECKOUT' }))
 
     await waitFor(() =>

@@ -13,9 +13,8 @@ jest.unstable_mockModule('../models/userModel.js', () => ({
 
 // ─── Dynamic imports ──────────────────────────────────────────────────────────
 
-const { addToCart, updateCart, getUserCart } = await import(
-  './cartController.js'
-)
+const { addToCart, updateCart, getUserCart } =
+  await import('./cartController.js')
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -31,10 +30,7 @@ describe('addToCart', () => {
     MockUserModel.findByIdAndUpdate.mockResolvedValue()
 
     const res = makeRes()
-    await addToCart(
-      { body: { userId: 'u1', itemId: 'p1', size: 'M' } },
-      res
-    )
+    await addToCart({ body: { userId: 'u1', itemId: 'p1', size: 'M' } }, res)
 
     expect(MockUserModel.findByIdAndUpdate).toHaveBeenCalledWith('u1', {
       cartData: { p1: { M: 1 } },

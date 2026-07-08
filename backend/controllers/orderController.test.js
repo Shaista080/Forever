@@ -164,8 +164,7 @@ describe('placeOrderStripe', () => {
 
     expect(mockSessionsCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        success_url:
-          'https://shop.test/verify?success=true&orderId=order-1',
+        success_url: 'https://shop.test/verify?success=true&orderId=order-1',
         cancel_url: 'https://shop.test/verify?success=false&orderId=order-1',
         mode: 'payment',
       })
