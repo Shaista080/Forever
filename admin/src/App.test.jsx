@@ -104,4 +104,28 @@ describe('Admin App', () => {
     // token cleared → Login screen returns
     expect(await screen.findByText('do-login')).toBeInTheDocument()
   })
+
+  it('passes a successful response through the interceptor unchanged', () => {
+    renderApp()
+
+    const successHandler = axios.interceptors.response.use.mock.calls[0][0]
+    const response = { data: 'ok' }
+    expect(successHandler(response)).toBe(response)
+  })
+
+  it('re-rejects a non-401 error without logging out or toasting', async () => {
+    localStorage.setItem('token', 'existing-token')
+    renderApp()
+
+    const errorHandler = axios.interceptors.response.use.mock.calls[0][1]
+    const { toast } = await import('react-toastify')
+    const error = { response: { status: 500 } }
+
+    await expect(errorHandler(error)).rejects.toBe(error)
+
+    expect(toast.error).not.toHaveBeenCalled()
+    // still on the dashboard, not kicked back to Login
+    expect(screen.getByTestId('sidebar')).toBeInTheDocument()
+    expect(screen.queryByText('do-login')).not.toBeInTheDocument()
+  })
 })
