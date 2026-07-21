@@ -142,4 +142,15 @@ describe('Orders Page', () => {
       expect(toast.error).toHaveBeenCalledWith('Network Error')
     )
   })
+
+  it('renders no order rows when the API responds success: false', async () => {
+    axios.post.mockResolvedValue({ data: { success: false } })
+    const { container } = renderOrders()
+
+    await waitFor(() => expect(axios.post).toHaveBeenCalled())
+    expect(
+      screen.queryByRole('button', { name: 'Track Order' })
+    ).not.toBeInTheDocument()
+    expect(container.querySelector('img')).not.toBeInTheDocument()
+  })
 })
