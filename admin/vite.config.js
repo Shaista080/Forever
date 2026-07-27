@@ -18,7 +18,6 @@ export default defineConfig({
       exclude: [
         'src/main.jsx',
         'src/setupTests.js',
-        'src/App.jsx',
         'src/assets/**',
         'src/**/*.test.{js,jsx}',
       ],
