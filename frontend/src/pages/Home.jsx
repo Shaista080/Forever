@@ -5,6 +5,7 @@ import OurPolicy from '../components/OurPolicy'
 import NewsletterBox from '../components/NewsletterBox'
 
 const Home = () => {
+  console.log('debug: home mounted')
   return (
     <div>
       <Hero />

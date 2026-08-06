@@ -15,6 +15,7 @@
   "license": "ISC",
   "devDependencies": {
     "cypress": "^15.8.2",
+    "danger": "^13.0.10",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-cypress": "^5.2.1",
