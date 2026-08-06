@@ -150,6 +150,8 @@ Nightly builds additionally run the full E2E suite, visual regression, Lighthous
 │   ├── src/hooks/          # *.test.jsx colocated with source
 │   └── src/pages/          # *.test.jsx + *.integration.test.jsx colocated
 ├── admin/                  # Admin panel React app — system under test
+│   ├── src/components/     # *.test.jsx + *.integration.test.jsx colocated
+│   └── src/pages/          # *.test.jsx + *.integration.test.jsx colocated
 ├── cypress/                # End-to-end specs, fixtures, custom commands
 │   ├── e2e/
 │   ├── fixtures/
@@ -191,26 +193,7 @@ cd admin && npm install
 
 ### 3. Configure environment variables
 
-Create `.env` files in each of `frontend/`, `admin/`, and `backend/`.
-
-`frontend/.env` and `admin/.env`:
-
-```
-VITE_BACKEND_URL=http://localhost:4000
-```
-
-`backend/.env`:
-
-```
-MONGODB_URI=mongodb://localhost:27017/forever
-JWT_SECRET=replace-me-with-a-long-random-string
-CLOUDINARY_API_KEY=...
-CLOUDINARY_SECRET_KEY=...
-CLOUDINARY_NAME=...
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=replace-me
-STRIPE_SECRET_KEY=sk_test_...
-```
+Each of `frontend/`, `admin/`, and `backend/` has a `.env.example` — copy it to `.env` and fill in real values:
 
 ### 4. Start MongoDB
 
@@ -243,6 +226,7 @@ cd admin && npm run dev     # Admin panel on :5174
 ```bash
 cd backend && npm test      # Jest — auth controllers + user model
 cd frontend && npm test     # Vitest — auth hook + Login/Signup pages
+cd admin && npm test        # Vitest — Login, Navbar, SideBar, Add/List/Order pages
 ```
 
 With coverage:
@@ -250,6 +234,7 @@ With coverage:
 ```bash
 cd backend && npm run test:coverage
 cd frontend && npm run test:coverage
+cd admin && npm run test:coverage
 ```
 
 Watch mode (backend):
@@ -306,6 +291,7 @@ GitHub Actions workflows live in `.github/workflows/`.
 - **`lint.yml`** — runs on every PR: ESLint + Prettier across frontend, admin, backend, and Cypress.
 - **`backend-tests.yml`** — runs on every PR touching `backend/`: unit + integration tests, coverage report posted as PR comment.
 - **`frontend-tests.yml`** — runs on every PR touching `frontend/`: unit + integration tests, coverage report posted as PR comment.
+- **`admin-tests.yml`** — runs on every PR touching `admin/`: unit + integration tests, coverage report posted as PR comment.
 - **`semantic-title.yml`** — enforces Conventional Commits format on PR titles.
 - **`nightly.yml`** — full E2E, visual regression, Lighthouse CI _(planned)_.
 - **`security.yml`** — weekly `npm audit`, CodeQL, dependency review _(planned)_.
