@@ -1,4 +1,4 @@
-import { danger, warn } from 'danger'
+import { danger, warn, schedule } from 'danger'
 
 const SKIP_PATTERNS = [
   /node_modules\//,
@@ -8,25 +8,27 @@ const SKIP_PATTERNS = [
   /dangerfile\.js$/,
 ]
 
-const changedFiles = [...danger.git.modified_files, ...danger.git.created_files]
-
-const filesToScan = changedFiles.filter(
-  file => !SKIP_PATTERNS.some(pattern => pattern.test(file))
-)
-
 const DEBUG_PATTERN = /\b(console\.(log|debug)|debugger)\b/
 
-for (const file of filesToScan) {
-  const diff = await danger.git.diffForFile(file)
-  if (!diff) continue
+schedule(async () => {
+  const changedFiles = [...danger.git.modified_files, ...danger.git.created_files]
 
-  const addedLines = diff.added
-    .split('\n')
-    .filter(line => line.startsWith('+') && !line.startsWith('+++'))
+  const filesToScan = changedFiles.filter(
+    file => !SKIP_PATTERNS.some(pattern => pattern.test(file))
+  )
 
-  const hasDebugCode = addedLines.some(line => DEBUG_PATTERN.test(line))
+  for (const file of filesToScan) {
+    const diff = await danger.git.diffForFile(file)
+    if (!diff) continue
 
-  if (hasDebugCode) {
-    warn(`Leftover \`console.log\`/\`debugger\` found in **${file}** — please remove before merging.`)
+    const addedLines = diff.added
+      .split('\n')
+      .filter(line => line.startsWith('+') && !line.startsWith('+++'))
+
+    const hasDebugCode = addedLines.some(line => DEBUG_PATTERN.test(line))
+
+    if (hasDebugCode) {
+      warn(`Leftover \`console.log\`/\`debugger\` found in **${file}** — please remove before merging.`)
+    }
   }
-}
+})
