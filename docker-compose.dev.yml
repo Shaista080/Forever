@@ -26,9 +26,11 @@ services:
         required: false
     environment: # Explicitly set MONGODB_URI for Docker Compose environment
       MONGODB_URI: mongodb://mongodb:27017
+      SKIP_IMAGE_UPLOAD: ${SKIP_IMAGE_UPLOAD:-false}
     volumes:
       - ./backend:/app # Mount host code for live reloading
       - /app/node_modules # Exclude node_modules from host mount
+      - ./frontend/src/assets:/frontend/src/assets # server.js runs seed on boot; needs same asset path as the seed service
     depends_on:
       mongodb:
         condition: service_healthy

@@ -28,6 +28,8 @@ jobs:
 
       - name: Start Docker Compose stack
         run: npm run docker:up
+        env:
+          SKIP_IMAGE_UPLOAD: "true"
 
       - name: Wait for services to be healthy
         run: |
