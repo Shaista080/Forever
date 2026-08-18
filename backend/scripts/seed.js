@@ -19,6 +19,8 @@ const IMAGES_BASE_PATH = path.join(
   'assets'
 )
 const SEED_DATA_PATH = path.join(__dirname, 'seed-data.json')
+const SKIP_IMAGE_UPLOAD = process.env.SKIP_IMAGE_UPLOAD === 'true'
+const PLACEHOLDER_IMAGE_URL = 'https://placehold.co/600x800?text=Product'
 
 // Configure Cloudinary
 cloudinary.config({
@@ -50,12 +52,19 @@ const seedDatabase = async () => {
     let productsToInsert = []
 
     console.log(
-      'Starting product image uploads to Cloudinary and preparing data...'
+      SKIP_IMAGE_UPLOAD
+        ? 'SKIP_IMAGE_UPLOAD is set — using placeholder images, no Cloudinary upload...'
+        : 'Starting product image uploads to Cloudinary and preparing data...'
     )
     for (const product of productsData) {
       const imagesUrl = []
       if (product.images && product.images.length > 0) {
         for (const imageName of product.images) {
+          if (SKIP_IMAGE_UPLOAD) {
+            imagesUrl.push(PLACEHOLDER_IMAGE_URL)
+            continue
+          }
+
           const imagePath = path.join(IMAGES_BASE_PATH, imageName)
           if (fs.existsSync(imagePath)) {
             try {

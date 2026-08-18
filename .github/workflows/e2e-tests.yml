@@ -1,0 +1,75 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Run Cypress E2E Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create backend .env
+        run: |
+          cat <<EOF > backend/.env
+          JWT_SECRET=test-secret
+          STRIPE_SECRET_KEY=sk_test_dummy
+          EOF
+
+      - name: Start Docker Compose stack
+        run: npm run docker:up
+
+      - name: Wait for services to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            backend_status=$(docker inspect -f '{{.State.Health.Status}}' backend 2>/dev/null || echo "starting")
+            if [ "$backend_status" = "healthy" ]; then
+              echo "Backend is healthy"
+              break
+            fi
+            echo "Waiting for backend... ($i/30)"
+            sleep 2
+          done
+
+      - name: Seed database
+        run: npm run docker:seed
+        env:
+          SKIP_IMAGE_UPLOAD: "true"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Cypress Tests
+        run: npm run cy:run
+
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Print backend logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml logs backend
+
+      - name: Stop Docker Compose stack
+        if: always()
+        run: npm run docker:down

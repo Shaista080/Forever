@@ -6,6 +6,11 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - app-network
 
@@ -17,14 +22,21 @@ services:
     ports:
       - "4000:4000"
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment: # Explicitly set MONGODB_URI for Docker Compose environment
       MONGODB_URI: mongodb://mongodb:27017
     volumes:
       - ./backend:/app # Mount host code for live reloading
       - /app/node_modules # Exclude node_modules from host mount
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:4000', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - app-network
 
@@ -41,7 +53,8 @@ services:
       - ./frontend:/app # Mount host code for hot reloading
       - /app/node_modules # Exclude node_modules from host mount
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -58,7 +71,8 @@ services:
       - ./admin:/app # Mount host code for hot reloading
       - /app/node_modules # Exclude node_modules from host mount
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -68,13 +82,16 @@ services:
       dockerfile: Dockerfile
     container_name: seed
     env_file:
-      - ./backend/.env
+      - path: ./backend/.env
+        required: false
     environment: # Explicitly set MONGODB_URI for Docker Compose environment
       MONGODB_URI: mongodb://mongodb:27017
+      SKIP_IMAGE_UPLOAD: ${SKIP_IMAGE_UPLOAD:-false}
     volumes: # Mount frontend assets to match seed.js path calculation
       - ./frontend/src/assets:/frontend/src/assets
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - app-network
     command: npm run db:seed # Run the seeding script

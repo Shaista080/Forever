@@ -27,7 +27,9 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    const user = await userModel.findOne({ email })
+    const lowerCaseEmail = email.toLowerCase()
+
+    const user = await userModel.findOne({ email: lowerCaseEmail })
     if (!user) {
       return res.json({ success: false, message: 'User does not exists' })
     }

@@ -39,6 +39,7 @@ const Login = () => {
           required
           onChange={(e) => setName(e.target.value)}
           value={name}
+          data-testid='auth-name-input'
         />
       )}
 
@@ -49,6 +50,7 @@ const Login = () => {
         required
         onChange={(e) => setEmail(e.target.value)}
         value={email}
+        data-testid='auth-email-input'
       />
 
       <input
@@ -58,6 +60,7 @@ const Login = () => {
         required
         onChange={(e) => setPassword(e.target.value)}
         value={password}
+        data-testid='auth-password-input'
       />
 
       {isSignUp && (
@@ -68,6 +71,7 @@ const Login = () => {
           required
           onChange={(e) => setConfirmPassword(e.target.value)}
           value={confirmPassword}
+          data-testid='auth-confirm-password-input'
         />
       )}
 
@@ -81,12 +85,16 @@ const Login = () => {
         <p
           onClick={() => setCurrentState(nextState)}
           className='cursor-pointer'
+          data-testid='auth-toggle-link'
         >
           {stateToggleText}
         </p>
       </div>
 
-      <button className='bg-black text-white font-light px-8 py-2 mt-4'>
+      <button
+        className='bg-black text-white font-light px-8 py-2 mt-4'
+        data-testid='auth-submit-button'
+      >
         {submitButtonText}
       </button>
     </form>
