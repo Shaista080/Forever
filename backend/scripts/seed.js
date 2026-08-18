@@ -1,7 +1,9 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
+import bcrypt from 'bcrypt'
 import { v2 as cloudinary } from 'cloudinary'
 import productModel from '../models/productModel.js'
+import userModel from '../models/userModel.js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -40,10 +42,51 @@ const connectDB = async () => {
   }
 }
 
-const seedDatabase = async () => {
-  await connectDB()
+const seedUser = async ({ email, password, name, role, label }) => {
+  if (!email || !password || !name) {
+    console.log(`Skipping ${label} seed: email/password/name not set.`)
+    return
+  }
 
+  const lowerEmail = email.toLowerCase()
+  const existing = await userModel.findOne({ email: lowerEmail })
+  if (existing) {
+    console.log(`${label} already exists, skipping.`)
+    return
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10)
+  await userModel.create({
+    name,
+    email: lowerEmail,
+    password: hashedPassword,
+    role,
+  })
+  console.log(`${label} seeded.`)
+}
+
+const seedUsers = async () => {
+  await seedUser({
+    email: process.env.ADMIN_EMAIL,
+    password: process.env.ADMIN_PASSWORD,
+    name: process.env.ADMIN_NAME,
+    role: 'admin',
+    label: 'Admin user',
+  })
+
+  await seedUser({
+    email: process.env.TEST_USER_EMAIL,
+    password: process.env.TEST_USER_PASSWORD,
+    name: process.env.TEST_USER_NAME,
+    role: 'user',
+    label: 'Test user',
+  })
+}
+
+export const runSeed = async () => {
   try {
+    await seedUsers()
+
     console.log('Clearing existing products from the database...')
     await productModel.deleteMany({})
     console.log('Existing products cleared.')
@@ -114,11 +157,25 @@ const seedDatabase = async () => {
     }
   } catch (error) {
     console.error('An error occurred during seeding:', error.message)
-    process.exit(1)
-  } finally {
-    mongoose.connection.close()
-    console.log('MongoDB connection closed.')
+    throw error
   }
 }
 
-seedDatabase()
+// True only when this file is executed directly (`node scripts/seed.js`),
+// not when server.js imports runSeed — server.js manages its own connection
+// and must not have it closed out from under it after seeding.
+const isStandalone =
+  process.argv[1] && import.meta.url === `file://${process.argv[1]}`
+
+if (isStandalone) {
+  connectDB()
+    .then(runSeed)
+    .catch((error) => {
+      console.error('Seeding failed:', error.message)
+      process.exitCode = 1
+    })
+    .finally(() => {
+      mongoose.connection.close()
+      console.log('MongoDB connection closed.')
+    })
+}
