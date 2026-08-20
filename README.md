@@ -195,15 +195,39 @@ cd admin && npm install
 
 Each of `frontend/`, `admin/`, and `backend/` has a `.env.example` — copy it to `.env` and fill in real values:
 
-### 4. Start MongoDB
+### 4. Start the stack (Docker)
+
+`docker-compose.dev.yml` brings up Mongo, backend, frontend, and admin together, with healthchecks so each service waits for its dependency to actually be ready (not just started):
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Startup order: Mongo → backend (waits for Mongo healthy) → frontend/admin (wait for backend healthy).
+
+Seeding the DB (products) is a separate, explicit step — it doesn't run automatically on `up`:
+
+```bash
+docker compose -f docker-compose.dev.yml --profile seed run --rm seed
+```
+
+By default this uploads real product images to Cloudinary (needs valid `CLOUDINARY_*` values in `backend/.env`). To skip image upload and use placeholder images instead (faster, no Cloudinary needed):
+
+```bash
+SKIP_IMAGE_UPLOAD=true docker compose -f docker-compose.dev.yml --profile seed run --rm seed
+```
+
+Tear down (and wipe the Mongo volume) when done:
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+```
+
+If you'd rather run Mongo standalone and the three apps natively (not in Docker), that still works:
 
 ```bash
 docker run --name mongoDB -d -p 27017:27017 mongo
 ```
-
-(Or use `docker-compose -f docker-compose.dev.yml up` to bring up the whole stack.)
-
-### 5. Run the app
 
 Run each part in a separate terminal:
 
@@ -213,7 +237,7 @@ cd frontend && npm run dev  # Customer storefront on :5173
 cd admin && npm run dev     # Admin panel on :5174
 ```
 
-> **Note:** The backend seed script runs automatically on every `npm run dev` and **clears all existing product data** before repopulating. Expected: up to 30 seconds before the server is ready.
+> **Note:** The seed script does **not** run automatically — it's a separate, explicit step and **clears all existing product data** before repopulating. Expected: up to 30 seconds before the server is ready.
 
 ---
 

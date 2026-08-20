@@ -5,6 +5,11 @@
   "main": "cypress.config.js",
   "type": "module",
   "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "docker:up": "docker compose -f docker-compose.dev.yml up --build -d",
+    "docker:seed": "docker compose -f docker-compose.dev.yml --profile seed run --rm seed",
+    "docker:down": "docker compose -f docker-compose.dev.yml down -v",
     "e2e:tests:eslint": "eslint cypress -c cypress/eslint.config.mjs",
     "e2e:tests:eslint:fix": "eslint cypress -c cypress/eslint.config.mjs --fix",
     "prettier:cy:check": "prettier --check cypress/",
@@ -14,11 +19,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "@testing-library/cypress": "^10.1.3",
     "cypress": "^15.8.2",
+    "cypress-real-events": "^1.15.0",
     "danger": "^13.0.10",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-cypress": "^5.2.1",
-    "prettier": "^3.7.4"
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }

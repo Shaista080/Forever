@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "types": ["cypress", "@testing-library/cypress", "cypress-real-events"],
+    "esModuleInterop": true
+  },
+  "include": ["**/*.ts"]
+}
