@@ -1,4 +1,9 @@
-import { RegisterUserPayload, RegisterUserResponse } from './index'
+import {
+  RegisterUserPayload,
+  RegisterUserResponse,
+  SeedProduct,
+  SeedProductCounts,
+} from './index'
 
 declare global {
   namespace Cypress {
@@ -10,6 +15,18 @@ declare global {
       registerUserViaApi(
         user: RegisterUserPayload
       ): Chainable<Cypress.Response<RegisterUserResponse>>
+
+      /**
+       * Reads backend/scripts/seed-data.json (via a Node task) and returns
+       * live category/type/combo product counts — stays correct if seed data changes.
+       */
+      getSeedProductCounts(): Chainable<SeedProductCounts>
+
+      /**
+       * Reads a single product's data (incl. price) from
+       * backend/scripts/seed-data.json by exact name, via a Node task.
+       */
+      getSeedProduct(name: string): Chainable<SeedProduct>
     }
   }
 }

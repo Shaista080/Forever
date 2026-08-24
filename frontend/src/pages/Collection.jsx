@@ -108,6 +108,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Men'}
                 onChange={toggleCategory}
+                data-testid='filter-category-men'
               />{' '}
               Men
             </p>
@@ -117,6 +118,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Women'}
                 onChange={toggleCategory}
+                data-testid='filter-category-women'
               />{' '}
               Women
             </p>
@@ -126,6 +128,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Kids'}
                 onChange={toggleCategory}
+                data-testid='filter-category-kids'
               />{' '}
               Kids
             </p>
@@ -146,6 +149,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Topwear'}
                 onChange={toggleSubCategory}
+                data-testid='filter-subcategory-topwear'
               />{' '}
               Topwear
             </p>
@@ -155,6 +159,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Bottomwear'}
                 onChange={toggleSubCategory}
+                data-testid='filter-subcategory-bottomwear'
               />{' '}
               Bottomwear
             </p>
@@ -164,6 +169,7 @@ const Collection = () => {
                 type='checkbox'
                 value={'Winterwear'}
                 onChange={toggleSubCategory}
+                data-testid='filter-subcategory-winterwear'
               />{' '}
               Winterwear
             </p>
@@ -180,6 +186,7 @@ const Collection = () => {
           <select
             onChange={(e) => setSortType(e.target.value)}
             className='border-2 border-gray-300 text-sm px-2'
+            data-testid='sort-select'
           >
             <option value='relevant'>Sort by: Relevant</option>
             <option value='low-high'>Sort by: Low to High</option>
@@ -188,7 +195,10 @@ const Collection = () => {
         </div>
 
         {/* MAP PRODUCTS */}
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+        <div
+          className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'
+          data-testid='product-grid'
+        >
           {filterProducts.map((item, i) => (
             <ProductItem
               key={i}

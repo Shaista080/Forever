@@ -1,11 +1,15 @@
 const { defineConfig } = require('cypress')
+const { getSeedProductCounts, getSeedProductByName } = require('./cypress/tasks/seedData.cjs')
 
 module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5173',
-    // setupNodeEvents(on, config) {
-    // implement node event listeners here
-    //  },
+    setupNodeEvents(on) {
+      on('task', {
+        getSeedProductCounts,
+        getSeedProductByName,
+      })
+    },
   },
   env: {
     apiUrl: 'http://localhost:4000',

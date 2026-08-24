@@ -27,6 +27,7 @@ const SearchBar = () => {
           className='flex-1 outline-none bg-inherit text-sm'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          data-testid='search-input'
         />
 
         <img src={assets.search_icon} className='w-4' alt='' />
