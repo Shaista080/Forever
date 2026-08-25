@@ -1,40 +1,40 @@
 import { faker } from '@faker-js/faker'
+import * as loginPage from '../pages/login'
+import * as navbar from '../pages/navbar'
+import { registerUserViaApi } from '../support/commands/auth'
 
 describe('Signup and login', () => {
   it('User is able to create a new account', () => {
     const name = faker.person.fullName()
     const email = faker.internet.email()
-    const password = 'Test@1234'
 
     cy.visit('/login')
 
     //switch to signup
-    cy.get('[data-testid="auth-toggle-link"]').click()
+    cy.get(loginPage.TOGGLE_LINK).click()
 
-    cy.get('[data-testid="auth-name-input"]').type(name)
-    cy.get('[data-testid="auth-email-input"]').type(email)
-    cy.get('[data-testid="auth-password-input"]').type(password)
-    cy.get('[data-testid="auth-confirm-password-input"]').type(password)
+    cy.get(loginPage.NAME_INPUT).type(name)
+    cy.get(loginPage.EMAIL_INPUT).type(email)
+    cy.get(loginPage.PASSWORD_INPUT).type(loginPage.testPassword)
+    cy.get(loginPage.CONFIRM_PASSWORD_INPUT).type(loginPage.testPassword)
 
-    cy.get('[data-testid="auth-submit-button"]').click()
+    cy.get(loginPage.SUBMIT_BUTTON).click()
 
     cy.url().should('eq', `${Cypress.config().baseUrl}/`)
     cy.window().its('localStorage.token').should('exist')
-    cy.get('[data-testid="navbar-profile-icon"]').should('be.visible')
+    cy.get(navbar.PROFILE_ICON).should('be.visible')
   })
 
   context('Login', () => {
     let email: string
-    let password: string
 
     beforeEach(() => {
       email = faker.internet.email()
-      password = 'Test@1234'
 
-      cy.registerUserViaApi({
+      registerUserViaApi({
         name: faker.person.fullName(),
         email,
-        password,
+        password: loginPage.testPassword,
       }).then((response) => {
         expect(response.body.success, response.body.message).to.be.true
       })
@@ -43,9 +43,9 @@ describe('Signup and login', () => {
     it('user is able to log in and stay logged in after a page reload', () => {
       cy.visit('/login')
 
-      cy.get('[data-testid="auth-email-input"]').type(email)
-      cy.get('[data-testid="auth-password-input"]').type(password)
-      cy.get('[data-testid="auth-submit-button"]').click()
+      cy.get(loginPage.EMAIL_INPUT).type(email)
+      cy.get(loginPage.PASSWORD_INPUT).type(loginPage.testPassword)
+      cy.get(loginPage.SUBMIT_BUTTON).click()
 
       cy.url().should('eq', `${Cypress.config().baseUrl}/`)
       cy.window().its('localStorage.token').should('exist')
@@ -54,7 +54,7 @@ describe('Signup and login', () => {
       cy.reload()
 
       cy.window().its('localStorage.token').should('exist')
-      cy.get('[data-testid="navbar-profile-icon"]').should('be.visible')
+      cy.get(navbar.PROFILE_ICON).should('be.visible')
     })
   })
 })

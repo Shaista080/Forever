@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2020",
+    "module": "es2020",
+    "moduleResolution": "bundler",
     "lib": ["es2020", "dom"],
     "types": ["cypress", "@testing-library/cypress", "cypress-real-events"],
     "esModuleInterop": true
