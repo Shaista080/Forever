@@ -77,6 +77,7 @@ const Product = () => {
                   }`}
                   key={i}
                   onClick={() => setSize(item)}
+                  data-testid={`product-size-${item}`}
                 >
                   {item}
                 </button>
@@ -87,6 +88,7 @@ const Product = () => {
           <button
             className='bg-black text-white px-8 py-3 text-sm active:bg-gray-700'
             onClick={() => addToCart(productData._id, size)}
+            data-testid='add-to-cart-button'
           >
             ADD TO CART
           </button>

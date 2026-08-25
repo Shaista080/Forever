@@ -33,7 +33,11 @@ const Navbar = () => {
           <p>HOME</p>
           <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
-        <NavLink to='/collection' className='flex flex-col items-center gap-1'>
+        <NavLink
+          to='/collection'
+          className='flex flex-col items-center gap-1'
+          data-testid='navbar-collection-link'
+        >
           <p>COLLECTION</p>
           <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
         </NavLink>
@@ -53,6 +57,7 @@ const Navbar = () => {
           className='w-5 cursor-pointer'
           onClick={() => setShowSearch(true)}
           alt=''
+          data-testid='navbar-search-icon'
         />
 
         <div className='group relative'>
@@ -90,9 +95,12 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link to='/cart' className='relative'>
+        <Link to='/cart' className='relative' data-testid='navbar-cart-link'>
           <img src={assets.cart_icon} className='w-5 min-w-5' alt='' />
-          <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>
+          <p
+            className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'
+            data-testid='navbar-cart-count'
+          >
             {getCartCount()}
           </p>
         </Link>

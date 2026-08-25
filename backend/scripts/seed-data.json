@@ -518,5 +518,25 @@
     "subCategory": "Winterwear",
     "sizes": ["S", "M", "L", "XL"],
     "bestSeller": false
+  },
+  {
+    "name": "E2E Guest Cart Item One",
+    "description": "Reserved for Cypress e2e guest-cart tests. Do not rename or remove.",
+    "price": 111,
+    "images": ["p_img1.png"],
+    "category": "Women",
+    "subCategory": "Topwear",
+    "sizes": ["S", "M", "L"],
+    "bestSeller": false
+  },
+  {
+    "name": "E2E Guest Cart Item Two",
+    "description": "Reserved for Cypress e2e guest-cart tests. Do not rename or remove.",
+    "price": 222,
+    "images": ["p_img2_1.png"],
+    "category": "Men",
+    "subCategory": "Topwear",
+    "sizes": ["S", "M", "L"],
+    "bestSeller": false
   }
 ]
