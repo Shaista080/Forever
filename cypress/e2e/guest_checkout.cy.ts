@@ -8,6 +8,7 @@ import {
   getSeedProduct,
   addProductToCartByName,
 } from '../support/commands/product'
+import { fillDeliveryAddress } from '../support/commands/checkout'
 
 const productOneName = 'E2E Guest Cart Item One'
 const productTwoName = 'E2E Guest Cart Item Two'
@@ -105,17 +106,7 @@ describe('Guest user checkout flow', () => {
 
     cy.intercept('POST', '**/api/order/place').as('placeOrder')
 
-    cy.fixture<GuestAddress>('guestAddress').then((guestAddress) => {
-      cy.get(checkoutPage.FIRST_NAME_INPUT).type(guestAddress.firstName)
-      cy.get(checkoutPage.LAST_NAME_INPUT).type(guestAddress.lastName)
-      cy.get(checkoutPage.EMAIL_INPUT).type(guestAddress.email)
-      cy.get(checkoutPage.STREET_INPUT).type(guestAddress.street)
-      cy.get(checkoutPage.CITY_INPUT).type(guestAddress.city)
-      cy.get(checkoutPage.STATE_INPUT).type(guestAddress.state)
-      cy.get(checkoutPage.ZIPCODE_INPUT).type(guestAddress.zipcode)
-      cy.get(checkoutPage.COUNTRY_INPUT).type(guestAddress.country)
-      cy.get(checkoutPage.PHONE_INPUT).type(guestAddress.phone)
-    })
+    cy.fixture<GuestAddress>('guestAddress').then(fillDeliveryAddress)
 
     cy.get(checkoutPage.SUBMIT_BUTTON).click()
 

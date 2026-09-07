@@ -11,6 +11,7 @@ import {
   visitAsLoggedInUser,
 } from '../support/commands/auth'
 import { addProductToCartByName } from '../support/commands/product'
+import { fillDeliveryAddress } from '../support/commands/checkout'
 
 const productOneName = 'E2E Guest Cart Item One'
 const productTwoName = 'E2E Guest Cart Item Two'
@@ -63,6 +64,30 @@ describe('Logged-in user checkout flow', () => {
       .should('have.text', 'L')
   })
 
+  it('Logged-in user is able to remove an item from cart', () => {
+    visitAsLoggedInUser('/collection', token)
+
+    addProductToCartByName(productOneName, 'S')
+    cy.get(navbar.CART_COUNT).should('have.text', '1')
+
+    cy.visit('/collection')
+    addProductToCartByName(productTwoName, 'L')
+    cy.get(navbar.CART_COUNT).should('have.text', '2')
+
+    cy.visit('/cart')
+    cy.get(cartPage.CART_ITEM).should('have.length', 2)
+
+    cy.get(cartPage.CART_ITEM)
+      .contains(cartPage.CART_ITEM_NAME, productOneName)
+      .parents(cartPage.CART_ITEM)
+      .find(cartPage.CART_ITEM_REMOVE)
+      .click()
+
+    cy.get(navbar.CART_COUNT).should('have.text', '1')
+    cy.get(cartPage.CART_ITEM).should('have.length', 1)
+    cy.get(cartPage.CART_ITEM_NAME).should('have.text', productTwoName)
+  })
+
   it('Logged-in user is able to complete purchase', () => {
     visitAsLoggedInUser('/collection', token)
     addProductToCartByName(productOneName, 'M')
@@ -76,17 +101,7 @@ describe('Logged-in user checkout flow', () => {
 
     cy.intercept('POST', '**/api/order/place').as('placeOrder')
 
-    cy.fixture<GuestAddress>('guestAddress').then((address) => {
-      cy.get(checkoutPage.FIRST_NAME_INPUT).type(address.firstName)
-      cy.get(checkoutPage.LAST_NAME_INPUT).type(address.lastName)
-      cy.get(checkoutPage.EMAIL_INPUT).type(address.email)
-      cy.get(checkoutPage.STREET_INPUT).type(address.street)
-      cy.get(checkoutPage.CITY_INPUT).type(address.city)
-      cy.get(checkoutPage.STATE_INPUT).type(address.state)
-      cy.get(checkoutPage.ZIPCODE_INPUT).type(address.zipcode)
-      cy.get(checkoutPage.COUNTRY_INPUT).type(address.country)
-      cy.get(checkoutPage.PHONE_INPUT).type(address.phone)
-    })
+    cy.fixture<GuestAddress>('guestAddress').then(fillDeliveryAddress)
 
     cy.get(checkoutPage.COD_PAYMENT_OPTION).click()
     cy.get(checkoutPage.PLACE_ORDER_BUTTON).click()
