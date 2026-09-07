@@ -126,6 +126,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='firstName'
+            data-testid='checkout-first-name-input'
             value={formData.firstName}
             required
           />
@@ -135,6 +136,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='lastName'
+            data-testid='checkout-last-name-input'
             value={formData.lastName}
             required
           />
@@ -146,6 +148,7 @@ const PlaceOrder = () => {
           className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
           onChange={onChangeHandler}
           name='email'
+          data-testid='checkout-email-input'
           value={formData.email}
           required
         />
@@ -156,6 +159,7 @@ const PlaceOrder = () => {
           className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
           onChange={onChangeHandler}
           name='street'
+          data-testid='checkout-street-input'
           value={formData.street}
           required
         />
@@ -167,6 +171,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='city'
+            data-testid='checkout-city-input'
             value={formData.city}
             required
           />
@@ -176,6 +181,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='state'
+            data-testid='checkout-state-input'
             value={formData.state}
             required
           />
@@ -188,6 +194,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='zipcode'
+            data-testid='checkout-zipcode-input'
             value={formData.zipcode}
             required
           />
@@ -197,6 +204,7 @@ const PlaceOrder = () => {
             className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
             onChange={onChangeHandler}
             name='country'
+            data-testid='checkout-country-input'
             value={formData.country}
             required
           />
@@ -207,6 +215,7 @@ const PlaceOrder = () => {
           className='border border-gray-300 rounded py-1.5 px-3.5 w-full'
           onChange={onChangeHandler}
           name='phone'
+          data-testid='checkout-phone-input'
           value={formData.phone}
           required
         />
@@ -247,6 +256,7 @@ const PlaceOrder = () => {
             </div>
             <div
               onClick={() => setMethod('cod')}
+              data-testid='payment-method-cod'
               className='flex items-center gap-3 border p-2 px-3 cursor-pointer'
             >
               <p
@@ -262,6 +272,7 @@ const PlaceOrder = () => {
 
           <div className='w-full text-end mt-8'>
             <button
+              data-testid='place-order-button'
               className='bg-black text-white px-16 py-3 text-sm'
               type='submit'
             >
