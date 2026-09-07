@@ -9,3 +9,4 @@ export const CART_SUBTOTAL = '[data-testid="cart-subtotal"]'
 export const CART_TOTAL = '[data-testid="cart-total"]'
 export const PROCEED_TO_CHECKOUT_BUTTON =
   '[data-testid="proceed-to-checkout-button"]'
+export const CART_ITEM_REMOVE = '[data-testid="cart-item-remove"]'
