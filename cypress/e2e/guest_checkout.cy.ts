@@ -4,7 +4,11 @@ import * as cartPage from '../pages/cart'
 import * as checkoutPage from '../pages/checkout'
 import * as navbar from '../pages/navbar'
 import { GuestAddress } from '../types'
-import { getSeedProduct } from '../support/commands/product'
+import {
+  getSeedProduct,
+  addProductToCartByName,
+} from '../support/commands/product'
+import { fillDeliveryAddress } from '../support/commands/checkout'
 
 const productOneName = 'E2E Guest Cart Item One'
 const productTwoName = 'E2E Guest Cart Item Two'
@@ -26,9 +30,7 @@ describe('Guest user checkout flow', () => {
     cy.get(collectionPage.PRODUCT_CARD).should('have.length.greaterThan', 0)
 
     // first product, size S
-    cy.get(collectionPage.productCardByName(productOneName)).click()
-    cy.get(productPage.productSizeByLabel('S')).click()
-    cy.get(productPage.ADD_TO_CART_BUTTON).click()
+    addProductToCartByName(productOneName, 'S')
 
     cy.get(navbar.CART_COUNT).should('have.text', '1')
 
@@ -36,9 +38,7 @@ describe('Guest user checkout flow', () => {
     // change) instead of cy.visit, which would do a full reload and wipe the
     // guest cart (cartItems only lives in React state, never persisted - code related issue)
     cy.get(navbar.COLLECTION_LINK).click()
-    cy.get(collectionPage.productCardByName(productTwoName)).click()
-    cy.get(productPage.productSizeByLabel('L')).click()
-    cy.get(productPage.ADD_TO_CART_BUTTON).click()
+    addProductToCartByName(productTwoName, 'L')
 
     cy.get(navbar.CART_COUNT).should('have.text', '2')
 
@@ -106,17 +106,7 @@ describe('Guest user checkout flow', () => {
 
     cy.intercept('POST', '**/api/order/place').as('placeOrder')
 
-    cy.fixture<GuestAddress>('guestAddress').then((guestAddress) => {
-      cy.get(checkoutPage.FIRST_NAME_INPUT).type(guestAddress.firstName)
-      cy.get(checkoutPage.LAST_NAME_INPUT).type(guestAddress.lastName)
-      cy.get(checkoutPage.EMAIL_INPUT).type(guestAddress.email)
-      cy.get(checkoutPage.STREET_INPUT).type(guestAddress.street)
-      cy.get(checkoutPage.CITY_INPUT).type(guestAddress.city)
-      cy.get(checkoutPage.STATE_INPUT).type(guestAddress.state)
-      cy.get(checkoutPage.ZIPCODE_INPUT).type(guestAddress.zipcode)
-      cy.get(checkoutPage.COUNTRY_INPUT).type(guestAddress.country)
-      cy.get(checkoutPage.PHONE_INPUT).type(guestAddress.phone)
-    })
+    cy.fixture<GuestAddress>('guestAddress').then(fillDeliveryAddress)
 
     cy.get(checkoutPage.SUBMIT_BUTTON).click()
 
