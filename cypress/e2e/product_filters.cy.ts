@@ -2,7 +2,7 @@ import { SeedProductCounts } from '../types'
 import * as collectionPage from '../pages/collection'
 import { getSeedProductCounts } from '../support/commands/product'
 
-describe('Guest User Exploring the Store', () => {
+describe('User Exploring the Store', () => {
   let counts: SeedProductCounts
 
   before(() => {
@@ -11,7 +11,7 @@ describe('Guest User Exploring the Store', () => {
     })
   })
 
-  it('Guest user can filter products by category', () => {
+  it('User can filter products by category', () => {
     cy.visit('/collection')
 
     cy.get(collectionPage.PRODUCT_CARD).should(
@@ -46,7 +46,7 @@ describe('Guest User Exploring the Store', () => {
     )
   })
 
-  it('Guest user can filter products based on type', () => {
+  it('User can filter products based on type', () => {
     cy.visit('/collection')
 
     cy.get(collectionPage.PRODUCT_CARD).should('have.length', counts.type.all)
@@ -83,7 +83,7 @@ describe('Guest User Exploring the Store', () => {
     cy.get(collectionPage.PRODUCT_CARD).should('have.length', counts.type.all)
   })
 
-  it('guest user can filter products by both category and type', () => {
+  it('User can filter products by both category and type', () => {
     cy.visit('/collection')
 
     cy.get(collectionPage.FILTER_CATEGORY_MEN).check({ force: true })

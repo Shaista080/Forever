@@ -38,6 +38,7 @@ const SearchBar = () => {
         className='inline w-3 cursor-pointer'
         alt=''
         onClick={() => setShowSearch(false)}
+        data-testid='search-clear-icon'
       />
     </div>
   ) : null
