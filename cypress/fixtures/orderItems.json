@@ -1,0 +1,23 @@
+[
+  {
+    "name": "E2E Order Item One",
+    "price": 40,
+    "quantity": 1,
+    "size": "S",
+    "image": ["https://example.com/product.png"]
+  },
+  {
+    "name": "E2E Order Item Two",
+    "price": 70,
+    "quantity": 2,
+    "size": "M",
+    "image": ["https://example.com/product.png"]
+  },
+  {
+    "name": "E2E Order Item Three",
+    "price": 100,
+    "quantity": 3,
+    "size": "L",
+    "image": ["https://example.com/product.png"]
+  }
+]
