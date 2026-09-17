@@ -1,4 +1,6 @@
 export const PROFILE_ICON = '[data-testid="navbar-profile-icon"]'
+export const PROFILE_DROPDOWN = '[data-testid="navbar-profile-dropdown"]'
+export const LOGOUT_BUTTON = '[data-testid="navbar-logout-button"]'
 export const COLLECTION_LINK = '[data-testid="navbar-collection-link"]'
 export const CART_LINK = '[data-testid="navbar-cart-link"]'
 export const CART_COUNT = '[data-testid="navbar-cart-count"]'
